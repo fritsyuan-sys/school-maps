@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f6f8f5">
+  <meta name="description" content="Find campus buildings, plan a walking route, and locate campus services.">
+  <title>Daan — Digital Access Assistance for Navigation</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+    :root {
+      --ink: #172b27; --muted: #788681; --green: #246c52; --green-dark: #1d5943;
+      --mint: #e8f2ec; --line: #e8ede9; --paper: #fff; --canvas: #f6f8f5;
+      --red: #bd5146; --red-pale: #faeeec; --gold: #a47729;
+      --shadow: 0 8px 30px rgba(27, 52, 43, .07);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font-family: "DM Sans", sans-serif; -webkit-font-smoothing: antialiased; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .topbar { height: 72px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 11px; color: inherit; text-decoration: none; }
+    .brand-mark { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: #fff; background: var(--green); }
+    .brand-copy { display: grid; gap: 2px; }
+    .brand-name { font: 800 19px/1.1 "Manrope", sans-serif; letter-spacing: -.7px; }
+    .brand-tagline { color: #74817b; font-size: 9px; font-weight: 600; }
+    .top-note { display: flex; align-items: center; gap: 8px; color: #66756e; font-size: 12px; font-weight: 600; }
+    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #71a786; }
+    .top-nav { display: flex; align-items: center; gap: 21px; }
+    .top-nav a { color: #65736e; text-decoration: none; font-size: 11px; font-weight: 700; }
+    .top-nav a:hover, .top-nav a[aria-current="page"] { color: var(--green); }
+    .top-nav .map-link { padding: 10px 14px; border-radius: 9px; color: white; background: var(--green); }
+    .top-nav .map-link:hover { color: white; background: var(--green-dark); }
+    .user-greeting { color: #66756e; font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .change-name { padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; color: #68766f; background: white; font-size: 9px; font-weight: 700; white-space: nowrap; }
+    .change-name:hover { color: var(--green); border-color: #b9d0c0; }
+    .name-dialog { width: min(420px, calc(100% - 32px)); padding: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; color: var(--ink); background: white; box-shadow: 0 20px 70px #172b2740; }
+    .name-dialog::backdrop { background: #172b2780; backdrop-filter: blur(3px); }
+    .name-dialog-inner { padding: 26px; }
+    .name-dialog h2 { margin: 9px 0 7px; font: 800 23px "Manrope", sans-serif; letter-spacing: -.7px; }
+    .name-dialog p { margin: 0 0 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .name-dialog label { display: block; margin-bottom: 6px; color: #52625b; font-size: 10px; font-weight: 700; }
+    .name-dialog input { width: 100%; height: 42px; padding: 0 11px; border: 1px solid #e3e9e5; border-radius: 9px; outline: 0; font-size: 12px; }
+    .name-dialog input:focus { border-color: #8cb79e; box-shadow: 0 0 0 3px #edf5ef; }
+    .name-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+    .name-dialog-actions button { min-height: 37px; padding: 0 13px; border: 1px solid var(--line); border-radius: 9px; color: #66756e; background: white; font-size: 10px; font-weight: 700; }
+    .name-dialog-actions button[type="submit"] { border-color: var(--green); color: white; background: var(--green); }
+    .name-dialog-actions button[type="submit"]:hover { background: var(--green-dark); }
+    .name-float { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; pointer-events: none; }
+    .name-float[hidden] { display: none; }
+    .name-float span { padding: 15px 23px; border: 1px solid #dce9e1; border-radius: 15px; color: var(--green-dark); background: #ffffffed; box-shadow: 0 10px 35px #19352b20; font: 800 clamp(22px, 4vw, 34px) "Manrope", sans-serif; }
+    .name-float.play span { animation: name-float-away 2.4s cubic-bezier(.2,.7,.35,1) forwards; }
+    @keyframes name-float-away {
+      0% { opacity: 0; transform: translateY(30px) scale(.96); }
+      12% { opacity: 1; transform: translateY(0) scale(1); }
+      55% { opacity: 1; transform: translateY(-22px) scale(1); }
+      100% { opacity: 0; transform: translateY(-110px) scale(.98); }
+    }
+    main { max-width: 1500px; margin: auto; padding: 34px 5% 28px; }
+    [hidden] { display: none !important; }
+    .welcome-page { max-width: 1240px; padding-top: 48px; }
+    .welcome-hero { position: relative; overflow: hidden; padding: clamp(30px, 6vw, 68px); border: 1px solid #e2ebe4; border-radius: 24px; background: linear-gradient(115deg, #f5faf6 0%, #edf5ef 58%, #e4f0e7 100%); }
+    .welcome-hero:after { content: ""; position: absolute; width: 330px; height: 330px; right: -85px; top: -130px; border: 1px solid #d4e5d8; border-radius: 50%; box-shadow: 0 0 0 34px #eaf3ec, 0 0 0 68px #edf5ef; opacity: .8; pointer-events: none; }
+    .welcome-content { position: relative; z-index: 1; max-width: 670px; }
+    .welcome-content h1 { max-width: 620px; margin: 13px 0 15px; font-size: clamp(36px, 6vw, 62px); letter-spacing: -2.7px; }
+    .welcome-copy { max-width: 560px; margin: 0; color: #66766d; font-size: clamp(14px, 2vw, 16px); line-height: 1.7; }
+    .welcome-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 25px; }
+    .primary-link { display: inline-flex; align-items: center; gap: 9px; padding: 13px 17px; border-radius: 10px; color: white; background: var(--green); text-decoration: none; font-size: 12px; font-weight: 700; box-shadow: 0 5px 15px #246c5230; }
+    .primary-link:hover { background: var(--green-dark); }
+    .welcome-hint { color: #738078; font-size: 10px; }
+    .welcome-section { padding: 35px 0 8px; }
+    .welcome-section h2 { margin: 7px 0 6px; font: 800 23px "Manrope", sans-serif; letter-spacing: -.7px; }
+    .welcome-section > p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+    .feature-card { min-height: 145px; padding: 19px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    .feature-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--green); background: var(--mint); }
+    .feature-card h3 { margin: 13px 0 5px; font: 700 13px "Manrope", sans-serif; }
+    .feature-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .howto { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 17px; }
+    .howto-step { display: flex; gap: 11px; align-items: flex-start; padding: 15px; border-radius: 12px; background: #fff; }
+    .step-number { flex: 0 0 25px; width: 25px; height: 25px; display: grid; place-items: center; border-radius: 50%; color: var(--green); background: var(--mint); font-size: 10px; font-weight: 700; }
+    .howto-step strong { display: block; margin: 2px 0 4px; font-size: 11px; }
+    .howto-step span:last-child { color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .welcome-safety { display: flex; align-items: flex-start; gap: 10px; padding: 13px 15px; margin-top: 21px; border: 1px solid #f0d9d5; border-radius: 11px; color: #78423d; background: #fff8f6; font-size: 10px; line-height: 1.55; }
+    .welcome-safety svg { flex: 0 0 auto; color: var(--red); }
+    .intro { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 22px; }
+    .eyebrow { color: var(--green); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    h1 { margin: 8px 0 7px; font: 800 clamp(27px, 3.1vw, 38px)/1.15 "Manrope", sans-serif; letter-spacing: -1.5px; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+    .campus-badge { display: flex; align-items: center; gap: 9px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 11px; color: #52625b; background: white; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .campus-badge svg { color: var(--green); }
+    .workspace { display: grid; grid-template-columns: minmax(290px, 345px) minmax(0, 1fr); min-height: 630px; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
+    .sidebar { min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+    .route-form { padding: 17px 18px 16px; border-bottom: 1px solid var(--line); }
+    .section-title { display: flex; align-items: center; gap: 8px; margin: 0 0 13px; font: 700 13px "Manrope", sans-serif; }
+    .section-title svg { color: var(--green); }
+    .field-label { display: block; margin: 10px 0 5px; color: #728079; font-size: 10px; font-weight: 700; }
+    .select-wrap { position: relative; }
+    .route-form select { width: 100%; height: 39px; padding: 0 30px 0 11px; appearance: none; border: 1px solid #e3e9e5; border-radius: 9px; outline: 0; color: var(--ink); background: #fbfcfb; font-size: 11px; }
+    .route-form select:focus, .search-input:focus { border-color: #8cb79e; box-shadow: 0 0 0 3px #edf5ef; }
+    .select-wrap:after { content: "⌄"; position: absolute; top: 7px; right: 12px; color: #718079; pointer-events: none; }
+    .route-button { width: 100%; height: 40px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 13px; border: 0; border-radius: 9px; color: #fff; background: var(--green); font-size: 11px; font-weight: 700; }
+    .route-button:hover { background: var(--green-dark); }
+    .route-output { padding: 12px 13px; margin-top: 12px; border: 1px solid #dcebe1; border-radius: 10px; background: #f5f9f6; }
+    .route-output[hidden] { display: none; }
+    .route-summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; font-size: 10px; font-weight: 700; }
+    .route-time { color: var(--green); white-space: nowrap; }
+    .route-steps { display: grid; gap: 6px; margin: 0; padding-left: 18px; color: #63716a; font-size: 10px; line-height: 1.45; }
+    .directory { display: flex; min-height: 0; flex: 1; flex-direction: column; }
+    .directory-head { padding: 14px 18px 9px; }
+    .searchbox { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border: 1px solid #e4eae6; border-radius: 9px; color: #85928b; background: #fbfcfb; }
+    .search-input { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 11px; }
+    .search-input::placeholder { color: #9aa59f; }
+    .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .filter { padding: 6px 9px; border: 1px solid #e6ebe7; border-radius: 18px; color: #68766f; background: white; font-size: 9px; font-weight: 700; }
+    .filter.selected { border-color: var(--green); color: white; background: var(--green); }
+    .places-heading { display: flex; justify-content: space-between; padding: 3px 19px 8px; color: #7c8882; font-size: 10px; }
+    .places-heading strong { color: var(--ink); font: 700 11px "Manrope", sans-serif; }
+    .place-detail { margin: 2px 12px 9px; padding: 11px; border: 1px solid #dce9e1; border-radius: 10px; background: #f5f9f6; }
+    .place-detail[hidden] { display: none; }
+    .place-detail-top { display: flex; align-items: center; gap: 8px; }
+    .place-detail-title { min-width: 0; flex: 1; margin: 0; font: 700 11px/1.35 "Manrope", sans-serif; }
+    .place-detail-type { display: block; margin-top: 2px; color: var(--muted); font: 500 9px "DM Sans", sans-serif; }
+    .place-detail-close { width: 24px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #718079; background: #e9f0eb; font-size: 16px; }
+    .place-detail-description { margin: 8px 0 7px; color: #5f6e66; font-size: 10px; line-height: 1.5; }
+    .place-detail-meta { color: #87928c; font-size: 9px; line-height: 1.45; }
+    .place-detail-note { display: block; margin-top: 7px; color: #8a6d36; font-size: 8px; font-weight: 700; }
+    .place-list { overflow: auto; padding: 0 9px 12px; }
+    .place-card { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 9px; border: 1px solid transparent; border-radius: 10px; color: inherit; background: white; text-align: left; }
+    .place-card:hover, .place-card.active { border-color: #dce9e1; background: #f5f9f6; }
+    .place-icon { flex: 0 0 34px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: var(--green); background: #eaf3ed; }
+    .place-icon.safety { color: var(--red); background: var(--red-pale); }
+    .place-icon.service { color: #9b7125; background: #fbf3e4; }
+    .place-copy { min-width: 0; flex: 1; }
+    .place-name { display: block; font-size: 10px; font-weight: 700; line-height: 1.35; }
+    .place-meta { display: block; margin-top: 3px; color: #87928c; font-size: 9px; }
+    .place-arrow { color: #98a49e; font-size: 15px; }
+    .no-results { padding: 22px 12px; color: var(--muted); text-align: center; font-size: 11px; }
+    .map-area { position: relative; min-width: 0; min-height: 630px; overflow: hidden; background: #eaf0e8; }
+    .map-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .building-hit { fill: transparent; stroke: transparent; stroke-width: 5; cursor: pointer; pointer-events: all; transition: fill .15s, stroke .15s; }
+    .building-hit:hover, .building-hit:focus { fill: #246c5228; stroke: #246c52; outline: none; }
+    .building-hit:focus-visible { stroke: #172b27; stroke-dasharray: 8 5; }
+    .map-top { position: absolute; z-index: 5; top: 15px; left: 17px; right: 17px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; pointer-events: none; }
+    .map-title { padding: 10px 13px; border: 1px solid #edf0ed; border-radius: 10px; background: white; box-shadow: 0 3px 12px #19352b12; }
+    .map-title strong { display: block; font-size: 11px; }
+    .map-title span { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .map-actions { display: flex; gap: 7px; pointer-events: auto; }
+    .map-action { display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border: 1px solid #edf0ed; border-radius: 9px; color: #53635c; background: white; box-shadow: 0 3px 12px #19352b12; font-size: 10px; font-weight: 700; }
+    .map-action:hover { color: var(--green); }
+    .safety-action { color: var(--red); }
+    .safety-action:hover { color: #9e3d35; }
+    .map-route { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+    .route-shadow { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13; }
+    .route-line { fill: none; stroke: #28805d; stroke-linecap: round; stroke-linejoin: round; stroke-width: 7; stroke-dasharray: 12 9; animation: travel 1s linear infinite; }
+    .route-line.emergency { stroke: #c3443a; }
+    @keyframes travel { to { stroke-dashoffset: -42; } }
+    .map-location { position: absolute; z-index: 3; display: flex; align-items: center; gap: 5px; transform: translate(-50%, -50%); padding: 5px 7px 5px 5px; border: 1px solid #e1e8e2; border-radius: 9px; color: #33453c; background: white; box-shadow: 0 2px 8px #19352b1a; white-space: nowrap; font-size: 9px; font-weight: 700; transition: transform .15s, box-shadow .15s; }
+    .map-location:hover, .map-location.active { z-index: 4; transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 4px 13px #19352b30; }
+    .map-location.active { border-color: var(--green); }
+    .map-location.safety { border-color: #efd4d0; }
+    .map-location.safety .pin-icon { color: var(--red); background: var(--red-pale); }
+    .pin-icon { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; color: var(--green); background: var(--mint); }
+    .pin-icon.service { color: #9b7125; background: #fbf3e4; }
+    .you-are-here { position: absolute; z-index: 2; left: 7%; top: 49%; display: none; align-items: center; gap: 6px; color: #385b4a; font-size: 9px; font-weight: 700; }
+    .you-are-here.visible { display: flex; }
+    .you-dot { width: 12px; height: 12px; border: 3px solid white; border-radius: 50%; background: #4587d8; box-shadow: 0 0 0 5px #4587d82e; }
+    .map-legend { position: absolute; z-index: 4; bottom: 16px; left: 16px; display: flex; flex-wrap: wrap; gap: 10px; padding: 9px 11px; border: 1px solid #edf0ed; border-radius: 9px; background: #ffffffed; box-shadow: 0 3px 12px #19352b12; }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: #66736d; font-size: 9px; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 3px; background: var(--green); }
+    .legend-dot.service { background: #d4a33f; }
+    .legend-dot.safety { background: var(--red); }
+    .zoom-tools { position: absolute; z-index: 5; right: 16px; bottom: 17px; display: grid; overflow: hidden; border: 1px solid #edf0ed; border-radius: 9px; background: white; box-shadow: 0 3px 12px #19352b12; }
+    .zoom-tools button { width: 34px; height: 33px; border: 0; color: #52625a; background: white; font-size: 18px; }
+    .zoom-tools button + button { border-top: 1px solid var(--line); }
+    .zoom-tools button:hover { color: var(--green); background: #f6f9f6; }
+    .map-note { position: absolute; z-index: 4; right: 61px; bottom: 23px; max-width: 220px; color: #7b8781; font-size: 8px; text-align: right; }
+    .map-place-card { position: absolute; z-index: 6; left: 16px; bottom: 63px; width: min(290px, calc(100% - 76px)); padding: 13px; border: 1px solid #e3ebe5; border-radius: 12px; background: #fff; box-shadow: 0 6px 22px #19352b25; }
+    .map-place-card[hidden] { display: none !important; }
+    .map-place-top { display: flex; align-items: center; gap: 8px; }
+    .map-place-title { min-width: 0; flex: 1; margin: 0; font: 700 12px/1.35 "Manrope", sans-serif; }
+    .map-place-type { display: block; margin-top: 2px; color: var(--muted); font: 500 9px "DM Sans", sans-serif; }
+    .map-place-close { width: 25px; height: 25px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #718079; background: #edf2ee; font-size: 16px; }
+    .map-place-description { margin: 9px 0 6px; color: #5f6e66; font-size: 10px; line-height: 1.5; }
+    .map-place-meta { color: #87928c; font-size: 9px; line-height: 1.45; }
+    .map-place-sample { display: block; margin-top: 7px; color: #8a6d36; font-size: 8px; font-weight: 700; }
+    footer { display: flex; justify-content: space-between; gap: 14px; padding: 14px 2px 0; color: #89948e; font-size: 9px; }
+    @media (max-width: 850px) {
+      .topbar { height: 65px; }
+      main { padding: 27px 4% 24px; }
+      .welcome-page { padding-top: 32px; }
+      .workspace { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .place-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 250px; }
+      .map-area { min-height: 540px; }
+    }
+    @media (max-width: 520px) {
+      .topbar { padding: 0 4%; }
+      .brand-name { font-size: 17px; }
+      .brand-tagline { max-width: 230px; font-size: 8px; }
+      .top-note { font-size: 10px; }
+      .top-nav { gap: 8px; }
+      .top-nav a { font-size: 10px; }
+      .top-nav .map-link { padding: 9px 10px; }
+      .user-greeting { max-width: 100px; overflow: hidden; font-size: 9px; text-overflow: ellipsis; }
+      .change-name { padding: 6px; font-size: 8px; }
+      main { padding: 24px 3.5% 20px; }
+      .welcome-page { padding-top: 22px; }
+      .welcome-hero { padding: 27px 22px; border-radius: 18px; }
+      .welcome-content h1 { letter-spacing: -1.7px; }
+      .feature-grid, .howto { grid-template-columns: 1fr; gap: 9px; }
+      .feature-card { min-height: auto; }
+      .intro { align-items: flex-start; flex-direction: column; gap: 13px; }
+      .place-list { grid-template-columns: 1fr; max-height: 250px; }
+      .map-area { min-height: 485px; }
+      .map-top { top: 10px; left: 10px; right: 10px; }
+      .map-title { padding: 8px 10px; }
+      .map-actions { gap: 5px; }
+      .map-action { width: 35px; padding: 0; justify-content: center; font-size: 0; }
+      .map-location { padding: 4px; }
+      .map-location .location-label { display: none; }
+      .map-location.active .location-label, .map-location:focus-visible .location-label { display: inline; }
+      .map-legend { bottom: 13px; left: 10px; gap: 7px; padding: 7px; }
+      .map-place-card { left: 10px; bottom: 58px; width: min(290px, calc(100% - 60px)); }
+      .legend-item { font-size: 8px; }
+      .zoom-tools { right: 10px; bottom: 13px; }
+      .map-note { display: none; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" data-page="home" aria-label="Daan — Digital Access Assistance for Navigation home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 4l9 6.5v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">Daan</span>
+        <span class="brand-tagline">Digital Access Assistance for Navigation</span>
+      </span>
+    </a>
+    <nav class="top-nav" aria-label="Main navigation">
+      <span class="user-greeting" id="header-greeting" aria-live="polite"></span>
+      <button class="change-name" id="change-name" type="button">Change name</button>
+      <a href="#home" data-page="home">About Daan</a>
+      <a href="#map" data-page="map" class="map-link">Campus map <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+  <dialog class="name-dialog" id="name-dialog" aria-labelledby="name-dialog-title">
+    <form class="name-dialog-inner" id="name-form">
+      <div class="eyebrow">Welcome to Daan</div>
+      <h2 id="name-dialog-title">What should we call you?</h2>
+      <p>Your name will be saved in this browser so we can greet you next time. It stays on this device.</p>
+      <label for="user-name">Your name</label>
+      <input id="user-name" name="userName" type="text" maxlength="40" autocomplete="given-name" placeholder="Enter your name" required>
+      <div class="name-dialog-actions">
+        <button type="button" id="cancel-name" hidden>Cancel</button>
+        <button type="submit">Save name</button>
+      </div>
+    </form>
+  </dialog>
+  <div class="name-float" id="name-float" aria-live="polite" role="status" hidden><span></span></div>
+  <main class="welcome-page" id="home-page">
+    <section class="welcome-hero" aria-labelledby="welcome-title">
+      <div class="welcome-content">
+        <div class="eyebrow" id="personal-greeting" aria-live="polite">Hello!</div>
+        <div class="eyebrow">Digital Access Assistance for Navigation</div>
+        <h1 id="welcome-title">A clearer way to find your way around campus.</h1>
+        <p class="welcome-copy">Daan helps students find campus buildings and useful places, learn what each location is for, and follow a walking route from one place to another.</p>
+        <div class="welcome-actions">
+          <a class="primary-link" href="#map" data-page="map">Open campus map <span aria-hidden="true">→</span></a>
+          <span class="welcome-hint">Search places · View details · Plan a route</span>
+        </div>
+      </div>
+    </section>
+    <section class="welcome-section" aria-labelledby="features-heading">
+      <div class="eyebrow">What you can do</div>
+      <h2 id="features-heading">Campus information in one place.</h2>
+      <p>Use the map to explore locations and plan where to go next.</p>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/></svg></span>
+          <h3>Find campus places</h3>
+          <p>Search buildings, services, gates, and safety locations, or browse the map markers.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+          <h3>Plan a walking route</h3>
+          <p>Choose where you are starting and where you want to go to see a suggested campus path.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4zM8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3>Learn about each place</h3>
+          <p>Select a location to read a short description and see useful information about it.</p>
+        </article>
+      </div>
+    </section>
+    <section class="welcome-section" aria-labelledby="how-heading">
+      <div class="eyebrow">Getting started</div>
+      <h2 id="how-heading">Three simple steps.</h2>
+      <div class="howto">
+        <div class="howto-step"><span class="step-number">1</span><span><strong>Open the campus map</strong><span>Use the button above or the Campus map link.</span></span></div>
+        <div class="howto-step"><span class="step-number">2</span><span><strong>Choose a place</strong><span>Search the directory or click a map marker for details.</span></span></div>
+        <div class="howto-step"><span class="step-number">3</span><span><strong>Plan your way there</strong><span>Select a start and destination to see a walking route.</span></span></div>
+      </div>
+    </section>
+    <aside class="welcome-safety" role="note">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 22 20H2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span><strong>Demo information:</strong> This website currently uses an illustrative campus map and sample place details. Confirm locations and routes with your school. In an emergency, follow staff instructions and the official evacuation plan.</span>
+    </aside>
+    <footer><span>Daan · Digital Access Assistance for Navigation</span><span>Campus map information is a demonstration.</span></footer>
+  </main>
+  <main id="map-page" hidden>
+    <section class="intro">
+      <div>
+        <div class="eyebrow">Get there with confidence</div>
+        <h1>Your campus, made easy to navigate.</h1>
+        <p class="subtitle">Find buildings, choose a starting point, and follow a clear walking route.</p>
+      </div>
+      <div class="campus-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 12h.01M15 12h.01M9 16h.01M15 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Northfield School · Main Campus
+      </div>
+    </section>
+
+    <section class="workspace" aria-label="Interactive campus map and directions">
+      <aside class="sidebar">
+        <div class="route-form">
+          <h2 class="section-title">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Plan a walking route
+          </h2>
+          <label class="field-label" for="start-select">Starting point</label>
+          <div class="select-wrap"><select id="start-select" aria-label="Starting point"></select></div>
+          <label class="field-label" for="destination-select">Where do you want to go?</label>
+          <div class="select-wrap"><select id="destination-select" aria-label="Destination"></select></div>
+          <button class="route-button" id="route-button" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Show walking route
+          </button>
+          <div class="route-output" id="route-output" aria-live="polite" hidden></div>
+        </div>
+        <div class="directory">
+          <div class="directory-head">
+            <label class="searchbox" for="place-search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <input class="search-input" id="place-search" type="search" placeholder="Search buildings, clinic, gates..." autocomplete="off">
+            </label>
+            <div class="filters" role="group" aria-label="Filter campus locations">
+              <button class="filter selected" data-filter="all" type="button">All places</button>
+              <button class="filter" data-filter="building" type="button">Buildings</button>
+              <button class="filter" data-filter="service" type="button">Services</button>
+              <button class="filter" data-filter="safety" type="button">Safety</button>
+            </div>
+          </div>
+          <div class="places-heading"><strong>Campus places</strong><span id="place-count">12 locations</span></div>
+          <section class="place-detail" id="place-detail" aria-live="polite" hidden></section>
+          <div class="place-list" id="place-list" aria-live="polite"></div>
+        </div>
+      </aside>
+
+      <div class="map-area" id="campus-map" aria-label="Illustrative campus map">
+        <svg class="map-art" viewBox="0 0 1000 680" preserveAspectRatio="none" role="img" aria-label="Illustrative campus grounds, walking paths, buildings and assembly point">
+          <rect width="1000" height="680" fill="#edf2ea"/>
+          <path d="M25 96Q144 34 254 82T430 72Q542 64 636 95L604 185 420 204 255 180 96 218Z" fill="#dcebd7"/>
+          <path d="M711 72 966 50 987 200 855 225 711 181Z" fill="#dcebd7"/>
+          <path d="M46 500 165 474 236 527 202 654 42 647Z" fill="#dcebd7"/>
+          <path d="M758 492 876 457 984 505 976 655 824 647Z" fill="#dcebd7"/>
+          <path d="M800 222 1000 189 1000 325 833 348Z" fill="#e2eddc"/>
+          <path d="M0 414 180 394 320 424 433 388 558 413 724 378 1000 410" fill="none" stroke="#d6e1d9" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M0 414 180 394 320 424 433 388 558 413 724 378 1000 410" fill="none" stroke="#fffaf0" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M80 420 232 421 316 420 490 420 682 420 790 420 916 420" fill="none" stroke="#d6e1d9" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M80 420 232 421 316 420 490 420 682 420 790 420 916 420" fill="none" stroke="#fffaf0" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M490 83 490 153 490 226 490 310 490 420 490 546 490 607" fill="none" stroke="#d6e1d9" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M490 83 490 153 490 226 490 310 490 420 490 546 490 607" fill="none" stroke="#fffaf0" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M316 420 316 310 316 226M316 310 490 310 682 310M682 310 682 420 682 546M316 420 316 546 490 546M682 420 790 420 916 420" fill="none" stroke="#fffaf0" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M316 310 316 226M490 310 490 226M682 310 682 226M316 546 316 606M682 546 682 606M490 607 490 636" fill="none" stroke="#fffaf0" stroke-width="18" stroke-linecap="round"/>
+          <g fill="#b5cbaa"><circle cx="91" cy="116" r="11"/><circle cx="126" cy="95" r="8"/><circle cx="170" cy="130" r="10"/><circle cx="859" cy="104" r="11"/><circle cx="901" cy="131" r="9"/><circle cx="920" cy="532" r="10"/><circle cx="886" cy="565" r="8"/><circle cx="116" cy="562" r="10"/><circle cx="149" cy="594" r="8"/><circle cx="840" cy="164" r="7"/><circle cx="206" cy="103" r="7"/></g>
+          <g fill="#75857a" font-family="DM Sans, sans-serif" font-size="13" font-weight="600" letter-spacing="1.2">
+            <text x="375" y="395">CENTRAL WALK</text><text x="527" y="289">NORTH WALK</text>
+            <text x="91" y="68">WEST QUAD</text><text x="786" y="70">EAST GARDEN</text>
+            <text x="828" y="620">ASSEMBLY FIELD</text>
+          </g>
+          <g fill="#d4e6d0"><rect x="90" y="520" width="19" height="14" rx="2"/><rect x="126" y="535" width="19" height="14" rx="2"/><rect x="857" y="496" width="19" height="14" rx="2"/><rect x="896" y="511" width="19" height="14" rx="2"/></g>
+          <g fill="#ece5d4"><rect x="250" y="250" width="130" height="97" rx="9"/><rect x="431" y="249" width="118" height="96" rx="9"/><rect x="613" y="249" width="139" height="97" rx="9"/><rect x="251" y="476" width="132" height="98" rx="9"/><rect x="615" y="476" width="138" height="98" rx="9"/><rect x="276" y="583" width="80" height="43" rx="7"/></g>
+          <g fill="#dcc9a5"><rect x="260" y="260" width="110" height="77" rx="6"/><rect x="441" y="259" width="98" height="76" rx="6"/><rect x="623" y="259" width="119" height="77" rx="6"/><rect x="261" y="486" width="112" height="78" rx="6"/><rect x="625" y="486" width="118" height="78" rx="6"/><rect x="284" y="590" width="64" height="29" rx="4" fill="#eadab9"/></g>
+          <g fill="#f5edda"><path d="M270 283h90M270 300h90M451 282h78M451 299h78M633 282h98M633 300h98M271 508h92M271 526h92M635 507h98M635 525h98" stroke="#f5edda" stroke-width="5"/></g>
+          <g fill="#f0dddb"><rect x="427" y="105" width="126" height="59" rx="8"/><rect x="257" y="106" width="118" height="58" rx="8"/></g>
+          <g aria-label="Clickable campus buildings">
+            <rect class="building-hit" data-location="office" x="250" y="250" width="130" height="97" rx="9" role="button" tabindex="0" aria-label="Main Office: show details"/>
+            <rect class="building-hit" data-location="library" x="431" y="249" width="118" height="96" rx="9" role="button" tabindex="0" aria-label="Library: show details"/>
+            <rect class="building-hit" data-location="science" x="613" y="249" width="139" height="97" rx="9" role="button" tabindex="0" aria-label="Science Building: show details"/>
+            <rect class="building-hit" data-location="class-a" x="251" y="476" width="132" height="98" rx="9" role="button" tabindex="0" aria-label="Classroom Block A: show details"/>
+            <rect class="building-hit" data-location="gym" x="615" y="476" width="138" height="98" rx="9" role="button" tabindex="0" aria-label="Gymnasium: show details"/>
+            <rect class="building-hit" data-location="clinic" x="276" y="583" width="80" height="43" rx="7" role="button" tabindex="0" aria-label="School Clinic: show details"/>
+          </g>
+        </svg>
+        <svg class="map-route" id="map-route" viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true"><polyline class="route-shadow" id="route-shadow" points=""></polyline><polyline class="route-line" id="route-line" points=""></polyline></svg>
+        <div id="map-locations"></div>
+        <section class="map-place-card" id="map-place-card" aria-live="polite" hidden></section>
+        <div class="you-are-here" id="you-are-here"><span class="you-dot"></span>You are here</div>
+        <div class="map-top">
+          <div class="map-title"><strong>Northfield Main Campus</strong><span>Click a building for details</span></div>
+          <div class="map-actions">
+            <button class="map-action" id="locate-button" type="button" aria-label="Use my location">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke="currentColor" stroke-width="1.8"/></svg>My location
+            </button>
+            <button class="map-action safety-action" id="assembly-button" type="button" aria-label="Show route to assembly point">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 22 20H2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Assembly point
+            </button>
+          </div>
+        </div>
+        <div class="map-legend" aria-label="Map legend">
+          <span class="legend-item"><i class="legend-dot"></i>Buildings</span>
+          <span class="legend-item"><i class="legend-dot service"></i>Services</span>
+          <span class="legend-item"><i class="legend-dot safety"></i>Safety</span>
+        </div>
+        <div class="map-note">Illustrative layout · Verify routes with campus staff</div>
+        <div class="zoom-tools" aria-label="Map zoom controls">
+          <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+          <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+        </div>
+      </div>
+    </section>
+    <footer><span>Daan · Sample campus map for demonstration</span><span>Ask your school for its current accessibility and emergency routes.</span></footer>
+  </main>
+  <script>
+    const locations = [
+      { id: "main-gate", name: "Main Gate", kind: "safety", group: "Safety", x: 8, y: 61, node: "mainGate", icon: "gate", short: "Main gate", description: "Primary campus entrance in this sample layout.", details: "Visitor check-in point" },
+      { id: "office", name: "Main Office", kind: "service", group: "Services", x: 31.6, y: 34, node: "office", icon: "office", short: "Main Office", description: "Front office for general questions, school administration, and visitor assistance.", details: "Administration · Visitor help" },
+      { id: "library", name: "Library", kind: "building", group: "Buildings", x: 49, y: 17, node: "library", icon: "building", short: "Library", description: "A study and reading space for students. Ask staff about opening hours and available resources.", details: "Study space · Books and learning resources" },
+      { id: "science", name: "Science Building", kind: "building", group: "Buildings", x: 69.5, y: 34, node: "science", icon: "building", short: "Science", description: "Sample location for science classrooms and practical learning spaces.", details: "Science classes · Labs (sample)" },
+      { id: "class-a", name: "Classroom Block A", kind: "building", group: "Buildings", x: 31.6, y: 76, node: "classA", icon: "building", short: "Block A", description: "Sample classroom building. Check your timetable or ask a teacher for your room number.", details: "Classrooms · Room numbers not specified" },
+      { id: "gym", name: "Gymnasium", kind: "building", group: "Buildings", x: 68.5, y: 76, node: "gym", icon: "building", short: "Gymnasium", description: "Indoor sports and physical education space in this sample campus layout.", details: "Sports · Physical education (sample)" },
+      { id: "clinic", name: "School Clinic", kind: "service", group: "Services", x: 31.6, y: 89, node: "clinic", icon: "clinic", short: "Clinic", description: "For health support, contact the school clinic or ask a staff member to assist you.", details: "Health support · Confirm staffed hours at school" },
+      { id: "east-gate", name: "East Gate", kind: "safety", group: "Safety", x: 91, y: 61, node: "eastGate", icon: "gate", short: "East gate", description: "Additional gate shown on the sample map. Confirm access and opening times with school staff.", details: "Gate access may be restricted" },
+      { id: "north-exit", name: "North Emergency Exit", kind: "safety", group: "Safety", x: 49, y: 12, node: "northExit", icon: "exit", short: "North exit", description: "Emergency exit marker for demonstration only. Follow staff directions and the official evacuation plan.", details: "Not a verified emergency exit" },
+      { id: "south-exit", name: "South Emergency Exit", kind: "safety", group: "Safety", x: 49, y: 92, node: "southExit", icon: "exit", short: "South exit", description: "Emergency exit marker for demonstration only. Follow staff directions and the official evacuation plan.", details: "Not a verified emergency exit" },
+      { id: "assembly", name: "Evacuation Assembly Point", kind: "safety", group: "Safety", x: 86, y: 86, node: "assembly", icon: "assembly", short: "Assembly point", description: "Sample assembly location. Use only the assembly area named in your school's official emergency instructions.", details: "Not a verified evacuation area" },
+      { id: "quad", name: "West Quad", kind: "building", group: "Buildings", x: 15, y: 20, node: "quad", icon: "building", short: "West Quad", description: "Outdoor campus gathering and open space shown in this sample map.", details: "Outdoor space · Facilities not specified" }
+    ];
+
+    const nodes = {
+      mainGate: { x: 80, y: 414 }, westJunction: { x: 232, y: 421 }, center: { x: 490, y: 420 },
+      eastJunction: { x: 790, y: 420 }, eastGate: { x: 916, y: 420 },
+      northJunction: { x: 490, y: 226 }, northCross: { x: 490, y: 153 },
+      southJunction: { x: 490, y: 546 }, southCross: { x: 490, y: 607 },
+      officeJunction: { x: 316, y: 310 }, scienceJunction: { x: 682, y: 310 },
+      clinicJunction: { x: 316, y: 546 }, gymJunction: { x: 682, y: 546 },
+      library: { x: 490, y: 125 }, office: { x: 316, y: 226 }, science: { x: 682, y: 226 },
+      classA: { x: 316, y: 500 }, gym: { x: 682, y: 500 }, clinic: { x: 316, y: 607 },
+      northExit: { x: 490, y: 83 }, southExit: { x: 490, y: 636 },
+      assemblyJunction: { x: 790, y: 546 }, assembly: { x: 850, y: 585 },
+      quadJunction: { x: 80, y: 414 }, quad: { x: 150, y: 210 }
+    };
+
+    const paths = [
+      ["mainGate", "westJunction", "Main Gate Walk", 2], ["westJunction", "center", "Central Walk", 3],
+      ["center", "eastJunction", "Central Walk", 3], ["eastJunction", "eastGate", "East Gate Walk", 2],
+      ["center", "northJunction", "North Walk", 2], ["northJunction", "northCross", "North Walk", 1],
+      ["northCross", "northExit", "North Exit Path", 1], ["northCross", "library", "Library Path", 1],
+      ["northJunction", "officeJunction", "West Quad Walk", 2], ["officeJunction", "office", "Office Path", 1],
+      ["northJunction", "scienceJunction", "Science Walk", 2], ["scienceJunction", "science", "Science Path", 1],
+      ["center", "southJunction", "South Walk", 2], ["southJunction", "southCross", "South Walk", 1],
+      ["southCross", "southExit", "South Exit Path", 1], ["southJunction", "clinicJunction", "Clinic Walk", 1],
+      ["clinicJunction", "clinic", "Clinic Path", 1], ["clinicJunction", "classA", "Classroom Block A Path", 1],
+      ["southJunction", "gymJunction", "Gym Walk", 1], ["gymJunction", "gym", "Gym Path", 1],
+      ["southJunction", "assemblyJunction", "East Garden Walk", 2],
+      ["assemblyJunction", "assembly", "Assembly Field Path", 2], ["westJunction", "quadJunction", "West Quad Walk", 2],
+      ["quadJunction", "quad", "Quad Path", 2], ["center", "officeJunction", "West Walk", 2],
+      ["center", "scienceJunction", "East Walk", 2]
+    ];
+
+    const placeList = document.getElementById("place-list");
+    const placeDetail = document.getElementById("place-detail");
+    const markerLayer = document.getElementById("map-locations");
+    const search = document.getElementById("place-search");
+    const startSelect = document.getElementById("start-select");
+    const destinationSelect = document.getElementById("destination-select");
+    const routeOutput = document.getElementById("route-output");
+    const mapPlaceCard = document.getElementById("map-place-card");
+    const homePage = document.getElementById("home-page");
+    const mapPage = document.getElementById("map-page");
+    const nameDialog = document.getElementById("name-dialog");
+    const nameForm = document.getElementById("name-form");
+    const nameInput = document.getElementById("user-name");
+    const cancelNameButton = document.getElementById("cancel-name");
+    const nameFloat = document.getElementById("name-float");
+    const nameStorageKey = "daan-user-name";
+    let savedUserName = localStorage.getItem(nameStorageKey) || "";
+    let activeFilter = "all";
+    let selectedPlace = null;
+    let zoom = 1;
+
+    function updateGreeting() {
+      const greeting = savedUserName ? `Hello, ${savedUserName}!` : "Hello!";
+      document.getElementById("header-greeting").textContent = greeting;
+      document.getElementById("personal-greeting").textContent = greeting;
+    }
+
+    function showNameFloat(name) {
+      nameFloat.querySelector("span").textContent = `Hello, ${name}!`;
+      nameFloat.hidden = false;
+      nameFloat.classList.remove("play");
+      void nameFloat.offsetWidth;
+      nameFloat.classList.add("play");
+    }
+
+    nameFloat.addEventListener("animationend", () => {
+      nameFloat.classList.remove("play");
+      nameFloat.hidden = true;
+    });
+
+    function openNameDialog(required = false) {
+      nameInput.value = savedUserName;
+      cancelNameButton.hidden = required;
+      nameDialog.dataset.required = String(required);
+      nameDialog.showModal();
+      nameInput.focus();
+    }
+
+    document.getElementById("change-name").addEventListener("click", () => openNameDialog(false));
+    cancelNameButton.addEventListener("click", () => nameDialog.close());
+    nameInput.addEventListener("input", () => nameInput.setCustomValidity(""));
+    nameDialog.addEventListener("cancel", event => {
+      if (nameDialog.dataset.required === "true") event.preventDefault();
+    });
+    nameForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const name = nameInput.value.trim();
+      if (!name) {
+        nameInput.setCustomValidity("Please enter your name.");
+        nameInput.reportValidity();
+        return;
+      }
+      nameInput.setCustomValidity("");
+      localStorage.setItem(nameStorageKey, name);
+      savedUserName = name;
+      updateGreeting();
+      nameDialog.close();
+      showNameFloat(savedUserName);
+    });
+
+    function showPage() {
+      const isMap = window.location.hash === "#map";
+      homePage.hidden = isMap;
+      mapPage.hidden = !isMap;
+      document.querySelectorAll(".top-nav [data-page]").forEach(link => {
+        if (link.dataset.page === (isMap ? "map" : "home")) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+      document.title = isMap
+        ? "Campus Map — Daan"
+        : "Daan — Digital Access Assistance for Navigation";
+      window.scrollTo(0, 0);
+    }
+
+    const iconMarkup = (name, size = 16) => {
+      const shapes = {
+        building: '<path d="M4 21V6l8-3 8 3v15M2 21h20M8 9h.01M16 9h.01M8 13h.01M16 13h.01M10 21v-4h4v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+        office: '<path d="M4 21V6l8-3 8 3v15M2 21h20M8 9h.01M16 9h.01M8 13h.01M16 13h.01M10 21v-4h4v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+        clinic: '<path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>',
+        gate: '<path d="M4 21V5l8-2 8 2v16M2 21h20M8 9v3m8-3v3m-4 5v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+        exit: '<path d="M4 12h15m-6-6 6 6-6 6M4 5v14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+        assembly: '<path d="M3 20h18M5 17l7-12 7 12M12 5v12m-5-4h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'
+      };
+      return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" aria-hidden="true">${shapes[name]}</svg>`;
+    };
+
+    function filteredLocations() {
+      const query = search.value.trim().toLowerCase();
+      return locations.filter(place => {
+        const matchesGroup = activeFilter === "all" || place.kind === activeFilter;
+        const matchesText = !query || `${place.name} ${place.group}`.toLowerCase().includes(query);
+        return matchesGroup && matchesText;
+      });
+    }
+
+    function renderPlaces() {
+      const shown = filteredLocations();
+      document.getElementById("place-count").textContent = `${shown.length} ${shown.length === 1 ? "location" : "locations"}`;
+      const selected = locations.find(place => place.id === selectedPlace);
+      mapPlaceCard.hidden = !selected;
+      mapPlaceCard.innerHTML = selected ? `
+        <div class="map-place-top">
+          <span class="place-icon ${selected.kind}">${iconMarkup(selected.icon, 17)}</span>
+          <h2 class="map-place-title">${selected.name}<span class="map-place-type">${selected.group}</span></h2>
+          <button class="map-place-close" type="button" aria-label="Close place details">×</button>
+        </div>
+        <p class="map-place-description">${selected.description}</p>
+        <div class="map-place-meta">${selected.details}</div>
+        <span class="map-place-sample">Sample information · Confirm details on campus</span>` : "";
+      mapPlaceCard.querySelector(".map-place-close")?.addEventListener("click", () => {
+        selectedPlace = null;
+        placeDetail.hidden = true;
+        renderPlaces();
+      });
+      placeDetail.hidden = !selected;
+      placeDetail.innerHTML = selected ? `
+        <div class="place-detail-top">
+          <span class="place-icon ${selected.kind}">${iconMarkup(selected.icon, 17)}</span>
+          <h3 class="place-detail-title">${selected.name}<span class="place-detail-type">${selected.group}</span></h3>
+          <button class="place-detail-close" type="button" aria-label="Close place information">×</button>
+        </div>
+        <p class="place-detail-description">${selected.description}</p>
+        <div class="place-detail-meta">${selected.details}</div>
+        <span class="place-detail-note">Sample information · Confirm details on campus</span>` : "";
+      placeDetail.querySelector(".place-detail-close")?.addEventListener("click", () => {
+        selectedPlace = null;
+        placeDetail.hidden = true;
+        renderPlaces();
+      });
+      placeList.innerHTML = shown.length ? shown.map(place => `
+        <button class="place-card ${selectedPlace === place.id ? "active" : ""}" type="button" data-id="${place.id}">
+          <span class="place-icon ${place.kind}">${iconMarkup(place.icon, 17)}</span>
+          <span class="place-copy"><span class="place-name">${place.name}</span><span class="place-meta">${place.group}</span></span>
+          <span class="place-arrow" aria-hidden="true">›</span>
+        </button>`).join("") : '<div class="no-results">No campus locations match that search.</div>';
+      placeList.querySelectorAll(".place-card").forEach(card => card.addEventListener("click", () => choosePlace(card.dataset.id)));
+      markerLayer.innerHTML = locations.map(place => `
+        <button class="map-location ${place.kind} ${selectedPlace === place.id ? "active" : ""}" type="button" data-id="${place.id}" style="left:${place.x}%;top:${place.y}%" aria-label="${place.name}">
+          <span class="pin-icon ${place.kind}">${iconMarkup(place.icon, 13)}</span>
+          <span class="location-label">${place.short}</span>
+        </button>`).join("");
+      markerLayer.querySelectorAll(".map-location").forEach(marker => marker.addEventListener("click", () => choosePlace(marker.dataset.id)));
+    }
+
+    function choosePlace(id) {
+      const place = locations.find(item => item.id === id);
+      if (!place) return;
+      selectedPlace = place.id;
+      destinationSelect.value = place.id;
+      renderPlaces();
+      buildRoute();
+    }
+
+    function buildRoute() {
+      const start = locations.find(place => place.id === startSelect.value);
+      const destination = locations.find(place => place.id === destinationSelect.value);
+      if (!start || !destination) return;
+      if (start.node === destination.node) {
+        routeOutput.hidden = false;
+        routeOutput.innerHTML = `<div class="route-summary"><span>You are already at ${destination.name}.</span></div>`;
+        clearRoute();
+        return;
+      }
+      const graph = Object.fromEntries(Object.keys(nodes).map(id => [id, []]));
+      paths.forEach(([from, to, name, minutes]) => {
+        graph[from].push({ node: to, name, minutes });
+        graph[to].push({ node: from, name, minutes });
+      });
+      const queue = [start.node];
+      const previous = new Map([[start.node, null]]);
+      while (queue.length) {
+        const current = queue.shift();
+        if (current === destination.node) break;
+        for (const edge of graph[current] || []) {
+          if (!previous.has(edge.node)) {
+            previous.set(edge.node, { from: current, edge });
+            queue.push(edge.node);
+          }
+        }
+      }
+      if (!previous.has(destination.node)) {
+        clearRoute();
+        routeOutput.hidden = false;
+        routeOutput.innerHTML = '<div class="route-summary">No mapped walking path found. Please ask campus staff for directions.</div>';
+        return;
+      }
+      const route = [];
+      let current = destination.node;
+      while (current !== start.node) {
+        const step = previous.get(current);
+        route.unshift({ from: step.from, to: current, ...step.edge });
+        current = step.from;
+      }
+      const totalMinutes = route.reduce((sum, step) => sum + step.minutes, 0);
+      const isSafety = destination.kind === "safety";
+      const instructions = route.map(step =>
+        `<li>Follow ${step.name}${step.to === destination.node ? ` to ${destination.name}` : ""}.</li>`
+      ).join("");
+      routeOutput.hidden = false;
+      routeOutput.innerHTML = `
+        <div class="route-summary"><span>${start.name} <span aria-hidden="true">→</span> ${destination.name}</span><span class="route-time">~${totalMinutes} min</span></div>
+        <ol class="route-steps">${instructions}</ol>
+        ${isSafety ? '<div style="margin-top:8px;color:#9e3d35;font-size:9px;font-weight:700">Sample route only. Follow official staff instructions in an emergency.</div>' : ""}`;
+      const points = [nodes[start.node], ...route.map(step => nodes[step.to])].map(point => `${point.x},${point.y}`).join(" ");
+      document.getElementById("route-shadow").setAttribute("points", points);
+      const line = document.getElementById("route-line");
+      line.setAttribute("points", points);
+      line.classList.toggle("emergency", isSafety);
+    }
+
+    function clearRoute() {
+      document.getElementById("route-shadow").setAttribute("points", "");
+      document.getElementById("route-line").setAttribute("points", "");
+      document.getElementById("route-line").classList.remove("emergency");
+    }
+
+    function fillSelects() {
+      const options = locations.map(place => `<option value="${place.id}">${place.name}</option>`).join("");
+      startSelect.innerHTML = options;
+      destinationSelect.innerHTML = options;
+      startSelect.value = "main-gate";
+      destinationSelect.value = "library";
+    }
+
+    document.querySelectorAll(".filter").forEach(button => button.addEventListener("click", () => {
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll(".filter").forEach(filter => filter.classList.toggle("selected", filter === button));
+      renderPlaces();
+    }));
+    search.addEventListener("input", renderPlaces);
+    document.getElementById("route-button").addEventListener("click", () => {
+      selectedPlace = destinationSelect.value;
+      renderPlaces();
+      buildRoute();
+    });
+    startSelect.addEventListener("change", buildRoute);
+    destinationSelect.addEventListener("change", () => {
+      selectedPlace = destinationSelect.value;
+      renderPlaces();
+      buildRoute();
+    });
+    document.querySelectorAll(".building-hit").forEach(building => {
+      building.addEventListener("click", () => choosePlace(building.dataset.location));
+      building.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choosePlace(building.dataset.location);
+        }
+      });
+    });
+    document.getElementById("assembly-button").addEventListener("click", () => {
+      destinationSelect.value = "assembly";
+      selectedPlace = "assembly";
+      renderPlaces();
+      buildRoute();
+    });
+    document.getElementById("locate-button").addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        routeOutput.hidden = false;
+        routeOutput.innerHTML = '<div class="route-summary">GPS is not available in this browser. Choose your starting point from the menu.</div>';
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          routeOutput.hidden = false;
+          routeOutput.innerHTML = '<div class="route-summary">GPS is available, but this sample campus map is not georeferenced. Choose your starting point from the menu.</div>';
+        },
+        error => {
+          routeOutput.hidden = false;
+          const message = error.code === error.PERMISSION_DENIED ? "Location permission was denied. Choose a starting point from the menu." : "Could not determine your location. Choose a starting point from the menu.";
+          routeOutput.innerHTML = `<div class="route-summary">${message}</div>`;
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
+      );
+    });
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      zoom = Math.min(zoom + 0.12, 1.5);
+      document.querySelector(".map-art").style.transform = `scale(${zoom})`;
+      markerLayer.style.transform = `scale(${zoom})`;
+      document.getElementById("map-route").style.transform = `scale(${zoom})`;
+    });
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      zoom = Math.max(zoom - 0.12, 1);
+      document.querySelector(".map-art").style.transform = `scale(${zoom})`;
+      markerLayer.style.transform = `scale(${zoom})`;
+      document.getElementById("map-route").style.transform = `scale(${zoom})`;
+    });
+    window.addEventListener("hashchange", showPage);
+    document.querySelector(".map-art").style.transition = "transform .2s ease";
+    markerLayer.style.transition = "transform .2s ease";
+    document.getElementById("map-route").style.transition = "transform .2s ease";
+    fillSelects();
+    renderPlaces();
+    buildRoute();
+    updateGreeting();
+    if (!savedUserName) openNameDialog(true);
+    else showNameFloat(savedUserName);
+    showPage();
+  </script>
+</body>
+</html>
