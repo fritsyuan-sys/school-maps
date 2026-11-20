@@ -153,9 +153,13 @@
     .safety-action { color: var(--red); }
     .safety-action:hover { color: #9e3d35; }
     .map-route { z-index: 1; overflow: visible; pointer-events: none; }
-    .route-shadow { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3.6; }
-    .route-line { fill: none; stroke: #28805d; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; stroke-dasharray: 4 3; animation: travel 1s linear infinite; }
+    .route-shadow { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-width: 14; opacity: .96; }
+    .route-line { fill: none; stroke: #ffb000; stroke-linecap: round; stroke-linejoin: round; stroke-width: 8; stroke-dasharray: 14 9; filter: drop-shadow(0 2px 3px #17352a70); animation: travel .75s linear infinite; }
     .route-line.emergency { stroke: #c3443a; }
+    .route-marker { fill: #fff; stroke: #ffb000; stroke-width: 5; filter: drop-shadow(0 3px 5px #17352a80); }
+    .route-marker.destination { fill: #ffb000; stroke: #fff; stroke-width: 5; }
+    .route-marker.emergency { stroke: #c3443a; }
+    .route-marker.destination.emergency { fill: #c3443a; }
     @keyframes travel { to { stroke-dashoffset: -42; } }
     #map-locations { position: absolute; z-index: 3; inset: 0; }
     .map-location { position: absolute; display: flex; align-items: center; gap: 5px; transform: translate(-50%, -50%); padding: 5px 7px 5px 5px; border: 1px solid #e1e8e2; border-radius: 9px; color: #33453c; background: white; box-shadow: 0 2px 8px #19352b1a; white-space: nowrap; font-size: 9px; font-weight: 700; transition: transform .15s, box-shadow .15s; }
@@ -437,7 +441,12 @@
           <svg class="map-art" viewBox="0 0 1227 768" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LNCHS campus map">
             <image href="assets/lnchs-map.png" x="0" y="0" width="1227" height="768" preserveAspectRatio="xMidYMid meet"/>
           </svg>
-          <svg class="map-route" id="map-route" viewBox="0 0 1227 768" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><polyline class="route-shadow" id="route-shadow" points=""></polyline><polyline class="route-line" id="route-line" points=""></polyline></svg>
+          <svg class="map-route" id="map-route" viewBox="0 0 1227 768" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <polyline class="route-shadow" id="route-shadow" points=""></polyline>
+            <polyline class="route-line" id="route-line" points=""></polyline>
+            <circle class="route-marker" id="route-start-marker" r="10" cx="0" cy="0" hidden></circle>
+            <circle class="route-marker destination" id="route-end-marker" r="10" cx="0" cy="0" hidden></circle>
+          </svg>
           <div id="map-locations"></div>
         </div>
         <section class="map-place-card" id="map-place-card" aria-live="polite" hidden></section>
@@ -888,12 +897,30 @@
       const line = document.getElementById("route-line");
       line.setAttribute("points", points);
       line.classList.toggle("emergency", isSafety);
+      const startMarker = document.getElementById("route-start-marker");
+      const endMarker = document.getElementById("route-end-marker");
+      const startPoint = nodes[start.node];
+      const endPoint = nodes[destination.node];
+      startMarker.setAttribute("cx", startPoint.x);
+      startMarker.setAttribute("cy", startPoint.y);
+      endMarker.setAttribute("cx", endPoint.x);
+      endMarker.setAttribute("cy", endPoint.y);
+      startMarker.hidden = false;
+      endMarker.hidden = false;
+      startMarker.classList.toggle("emergency", isSafety);
+      endMarker.classList.toggle("emergency", isSafety);
     }
 
     function clearRoute() {
       document.getElementById("route-shadow").setAttribute("points", "");
-      document.getElementById("route-line").setAttribute("points", "");
-      document.getElementById("route-line").classList.remove("emergency");
+      const line = document.getElementById("route-line");
+      line.setAttribute("points", "");
+      line.classList.remove("emergency");
+      ["route-start-marker", "route-end-marker"].forEach(id => {
+        const marker = document.getElementById(id);
+        marker.hidden = true;
+        marker.classList.remove("emergency");
+      });
     }
 
     function fillSelects() {
