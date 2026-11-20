@@ -91,6 +91,9 @@
     .campus-badge svg { color: var(--green); }
     .workspace { display: grid; grid-template-columns: minmax(290px, 345px) minmax(0, 1fr); min-height: 630px; overflow: hidden; border: 1px solid var(--line); border-radius: 17px; background: #fff; box-shadow: var(--shadow); }
     .sidebar { min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+    .location-photo { padding: 14px 18px 0; margin: 0; }
+    .location-photo img { display: block; width: 100%; max-height: 230px; height: auto; object-fit: contain; border-radius: 10px; background: #f4f5f2; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+    .location-photo figcaption { margin-top: 6px; color: #52625b; font-size: 10px; font-weight: 700; }
     .route-form { padding: 17px 18px 16px; border-bottom: 1px solid var(--line); }
     .section-title { display: flex; align-items: center; gap: 8px; margin: 0 0 13px; font: 700 13px "Manrope", sans-serif; }
     .section-title svg { color: var(--green); }
@@ -136,11 +139,10 @@
     .place-meta { display: block; margin-top: 3px; color: #87928c; font-size: 9px; }
     .place-arrow { color: #98a49e; font-size: 15px; }
     .no-results { padding: 22px 12px; color: var(--muted); text-align: center; font-size: 11px; }
-    .map-area { position: relative; min-width: 0; min-height: 630px; overflow: hidden; background: #eaf0e8; }
-    .map-art { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .building-hit { fill: transparent; stroke: transparent; stroke-width: 5; cursor: pointer; pointer-events: all; transition: fill .15s, stroke .15s; }
-    .building-hit:hover, .building-hit:focus { fill: #246c5228; stroke: #246c52; outline: none; }
-    .building-hit:focus-visible { stroke: #172b27; stroke-dasharray: 8 5; }
+    .map-area { position: relative; align-self: start; min-width: 0; width: 100%; height: 630px; overflow: hidden; background: #f4f5f2; }
+    .map-stage { position: absolute; top: 50%; left: 50%; width: 100%; aspect-ratio: 1227 / 768; transform: translate(-50%, -50%); transform-origin: center; }
+    .map-art, .map-route { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .map-art image { width: 100%; height: 100%; }
     .map-top { position: absolute; z-index: 5; top: 15px; left: 17px; right: 17px; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; pointer-events: none; }
     .map-title { padding: 10px 13px; border: 1px solid #edf0ed; border-radius: 10px; background: white; box-shadow: 0 3px 12px #19352b12; }
     .map-title strong { display: block; font-size: 11px; }
@@ -150,14 +152,21 @@
     .map-action:hover { color: var(--green); }
     .safety-action { color: var(--red); }
     .safety-action:hover { color: #9e3d35; }
-    .map-route { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
-    .route-shadow { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-width: 13; }
-    .route-line { fill: none; stroke: #28805d; stroke-linecap: round; stroke-linejoin: round; stroke-width: 7; stroke-dasharray: 12 9; animation: travel 1s linear infinite; }
+    .map-route { z-index: 1; overflow: visible; pointer-events: none; }
+    .route-shadow { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3.6; }
+    .route-line { fill: none; stroke: #28805d; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; stroke-dasharray: 4 3; animation: travel 1s linear infinite; }
     .route-line.emergency { stroke: #c3443a; }
     @keyframes travel { to { stroke-dashoffset: -42; } }
-    .map-location { position: absolute; z-index: 3; display: flex; align-items: center; gap: 5px; transform: translate(-50%, -50%); padding: 5px 7px 5px 5px; border: 1px solid #e1e8e2; border-radius: 9px; color: #33453c; background: white; box-shadow: 0 2px 8px #19352b1a; white-space: nowrap; font-size: 9px; font-weight: 700; transition: transform .15s, box-shadow .15s; }
+    #map-locations { position: absolute; z-index: 3; inset: 0; }
+    .map-location { position: absolute; display: flex; align-items: center; gap: 5px; transform: translate(-50%, -50%); padding: 5px 7px 5px 5px; border: 1px solid #e1e8e2; border-radius: 9px; color: #33453c; background: white; box-shadow: 0 2px 8px #19352b1a; white-space: nowrap; font-size: 9px; font-weight: 700; transition: transform .15s, box-shadow .15s; }
     .map-location:hover, .map-location.active { z-index: 4; transform: translate(-50%, -50%) scale(1.08); box-shadow: 0 4px 13px #19352b30; }
     .map-location.active { border-color: var(--green); }
+    .map-location.room-marker { width: 40px; height: 40px; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; box-shadow: none; }
+    .map-location.room-marker:hover, .map-location.room-marker.active { box-shadow: none; }
+    .map-location.room-marker:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
+    .map-location.room-marker .pin-icon { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 1px 3px #19352b55; }
+    .map-location.room-marker.active .pin-icon { outline: 2px solid var(--green); outline-offset: 2px; }
+    .map-location.room-marker .pin-icon svg { display: none; }
     .map-location.safety { border-color: #efd4d0; }
     .map-location.safety .pin-icon { color: var(--red); background: var(--red-pale); }
     .pin-icon { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; color: var(--green); background: var(--mint); }
@@ -175,12 +184,12 @@
     .zoom-tools button + button { border-top: 1px solid var(--line); }
     .zoom-tools button:hover { color: var(--green); background: #f6f9f6; }
     .map-note { position: absolute; z-index: 4; right: 61px; bottom: 23px; max-width: 220px; color: #7b8781; font-size: 8px; text-align: right; }
-    .map-place-card { position: absolute; z-index: 6; left: 16px; bottom: 63px; width: min(290px, calc(100% - 76px)); padding: 13px; border: 1px solid #e3ebe5; border-radius: 12px; background: #fff; box-shadow: 0 6px 22px #19352b25; }
+    .map-place-card { position: absolute; z-index: 6; left: 16px; bottom: 63px; width: min(290px, calc(100% - 76px)); padding: 13px; border: 1px solid #e3ebe5; border-radius: 12px; background: #fff; box-shadow: 0 6px 22px #19352b25; pointer-events: none; }
     .map-place-card[hidden] { display: none !important; }
     .map-place-top { display: flex; align-items: center; gap: 8px; }
     .map-place-title { min-width: 0; flex: 1; margin: 0; font: 700 12px/1.35 "Manrope", sans-serif; }
     .map-place-type { display: block; margin-top: 2px; color: var(--muted); font: 500 9px "DM Sans", sans-serif; }
-    .map-place-close { width: 25px; height: 25px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #718079; background: #edf2ee; font-size: 16px; }
+    .map-place-close { width: 25px; height: 25px; display: grid; place-items: center; border: 0; border-radius: 50%; color: #718079; background: #edf2ee; font-size: 16px; pointer-events: auto; }
     .map-place-description { margin: 9px 0 6px; color: #5f6e66; font-size: 10px; line-height: 1.5; }
     .map-place-meta { color: #87928c; font-size: 9px; line-height: 1.45; }
     .map-place-sample { display: block; margin-top: 7px; color: #8a6d36; font-size: 8px; font-weight: 700; }
@@ -192,7 +201,7 @@
       .workspace { grid-template-columns: 1fr; }
       .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
       .place-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 250px; }
-      .map-area { min-height: 540px; }
+      .map-area { height: 540px; }
     }
     @media (max-width: 520px) {
       .topbar { padding: 0 4%; }
@@ -212,7 +221,7 @@
       .feature-card { min-height: auto; }
       .intro { align-items: flex-start; flex-direction: column; gap: 13px; }
       .place-list { grid-template-columns: 1fr; max-height: 250px; }
-      .map-area { min-height: 485px; }
+      .map-area { height: 485px; }
       .map-top { top: 10px; left: 10px; right: 10px; }
       .map-title { padding: 8px 10px; }
       .map-actions { gap: 5px; }
@@ -310,7 +319,7 @@
     </section>
     <aside class="welcome-safety" role="note">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 22 20H2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <span><strong>Demo information:</strong> This website currently uses an illustrative campus map and sample place details. Confirm locations and routes with your school. In an emergency, follow staff instructions and the official evacuation plan.</span>
+      <span><strong>Map information:</strong> Daan uses the supplied LNCHS campus map. Confirm locations and walking routes with your school. In an emergency, follow staff instructions and the official evacuation plan.</span>
     </aside>
     <footer><span>Daan · Digital Access Assistance for Navigation</span><span>Campus map information is a demonstration.</span></footer>
   </main>
@@ -323,12 +332,72 @@
       </div>
       <div class="campus-badge">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 12h.01M15 12h.01M9 16h.01M15 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Northfield School · Main Campus
+        LNCHS · Main Campus
       </div>
     </section>
 
     <section class="workspace" aria-label="Interactive campus map and directions">
       <aside class="sidebar">
+        <figure class="location-photo" id="dolor-photo" hidden>
+          <img src="assets/dolor-amphitheater.jpg" alt="Dolor Amphitheater" draggable="false">
+          <figcaption>Dolor Amphitheater</figcaption>
+        </figure>
+        <figure class="location-photo" id="filipino-photo" hidden>
+          <img src="assets/filipino-dept.jpg" alt="Filipino Department building" draggable="false">
+          <figcaption>Filipino Dept</figcaption>
+        </figure>
+        <figure class="location-photo" id="sampaguita-photo" hidden>
+          <img src="assets/g7-sampaguita.jpg" alt="G7 Sampaguita classroom" draggable="false">
+          <figcaption>G7 Sampaguita</figcaption>
+        </figure>
+        <figure class="location-photo" id="rosal-photo" hidden>
+          <img src="assets/g7-rosal-rosas.jpg" alt="G7 Rosal / Rosas classroom" draggable="false">
+          <figcaption>G7 Rosal / Rosas</figcaption>
+        </figure>
+        <figure class="location-photo" id="hyacinth-photo" hidden>
+          <img src="assets/g7-hyacinth.jpg" alt="G7 Hyacinth classroom" draggable="false">
+          <figcaption>G7 Hyacinth</figcaption>
+        </figure>
+        <figure class="location-photo" id="vera-hall-photo" hidden>
+          <img src="assets/vera-hall.jpg" alt="Vera Hall" draggable="false">
+          <figcaption>Vera Hall</figcaption>
+        </figure>
+        <figure class="location-photo" id="tle-dept-photo" hidden>
+          <img src="assets/tle-dept.jpg" alt="TLE Department" draggable="false">
+          <figcaption>TLE Dept</figcaption>
+        </figure>
+        <figure class="location-photo" id="values-department-photo" hidden>
+          <img src="assets/values-department.jpg" alt="Values Department" draggable="false">
+          <figcaption>Values Department</figcaption>
+        </figure>
+        <figure class="location-photo" id="tulips-photo" hidden>
+          <img src="assets/g7-tulips.jpg" alt="G7 Tulips classroom" draggable="false">
+          <figcaption>G7 Tulips</figcaption>
+        </figure>
+        <figure class="location-photo" id="admin-bldg-photo" hidden>
+          <img src="assets/admin-bldg.jpg" alt="Admin Building" draggable="false">
+          <figcaption>Admin Bldg</figcaption>
+        </figure>
+        <figure class="location-photo" id="track-oval-photo" hidden>
+          <img src="assets/track-and-field-oval.jpg" alt="LNCHS Track and Field Oval" draggable="false">
+          <figcaption>LNCHS Track and Field Oval</figcaption>
+        </figure>
+        <figure class="location-photo" id="sunflower-photo" hidden>
+          <img src="assets/g7-sunflower.jpg" alt="G7 Sunflower classroom" draggable="false">
+          <figcaption>G7 Sunflower</figcaption>
+        </figure>
+        <figure class="location-photo" id="buttercup-photo" hidden>
+          <img src="assets/g7-buttercup.jpg" alt="G7 Buttercup classroom" draggable="false">
+          <figcaption>G7 Buttercup</figcaption>
+        </figure>
+        <figure class="location-photo" id="hibiscus-photo" hidden>
+          <img src="assets/g7-hibiscus.jpg" alt="G7 Hibiscus classroom" draggable="false">
+          <figcaption>G7 Hibiscus</figcaption>
+        </figure>
+        <figure class="location-photo" id="magnolia-photo" hidden>
+          <img src="assets/g7-magnolia.jpg" alt="G7 Magnolia classroom" draggable="false">
+          <figcaption>G7 Magnolia</figcaption>
+        </figure>
         <div class="route-form">
           <h2 class="section-title">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="6" cy="18" r="2.5" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 18h3a3 3 0 0 0 3-3V9a3 3 0 0 1 3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -363,126 +432,205 @@
         </div>
       </aside>
 
-      <div class="map-area" id="campus-map" aria-label="Illustrative campus map">
-        <svg class="map-art" viewBox="0 0 1000 680" preserveAspectRatio="none" role="img" aria-label="Illustrative campus grounds, walking paths, buildings and assembly point">
-          <rect width="1000" height="680" fill="#edf2ea"/>
-          <path d="M25 96Q144 34 254 82T430 72Q542 64 636 95L604 185 420 204 255 180 96 218Z" fill="#dcebd7"/>
-          <path d="M711 72 966 50 987 200 855 225 711 181Z" fill="#dcebd7"/>
-          <path d="M46 500 165 474 236 527 202 654 42 647Z" fill="#dcebd7"/>
-          <path d="M758 492 876 457 984 505 976 655 824 647Z" fill="#dcebd7"/>
-          <path d="M800 222 1000 189 1000 325 833 348Z" fill="#e2eddc"/>
-          <path d="M0 414 180 394 320 424 433 388 558 413 724 378 1000 410" fill="none" stroke="#d6e1d9" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M0 414 180 394 320 424 433 388 558 413 724 378 1000 410" fill="none" stroke="#fffaf0" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M80 420 232 421 316 420 490 420 682 420 790 420 916 420" fill="none" stroke="#d6e1d9" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M80 420 232 421 316 420 490 420 682 420 790 420 916 420" fill="none" stroke="#fffaf0" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M490 83 490 153 490 226 490 310 490 420 490 546 490 607" fill="none" stroke="#d6e1d9" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M490 83 490 153 490 226 490 310 490 420 490 546 490 607" fill="none" stroke="#fffaf0" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M316 420 316 310 316 226M316 310 490 310 682 310M682 310 682 420 682 546M316 420 316 546 490 546M682 420 790 420 916 420" fill="none" stroke="#fffaf0" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M316 310 316 226M490 310 490 226M682 310 682 226M316 546 316 606M682 546 682 606M490 607 490 636" fill="none" stroke="#fffaf0" stroke-width="18" stroke-linecap="round"/>
-          <g fill="#b5cbaa"><circle cx="91" cy="116" r="11"/><circle cx="126" cy="95" r="8"/><circle cx="170" cy="130" r="10"/><circle cx="859" cy="104" r="11"/><circle cx="901" cy="131" r="9"/><circle cx="920" cy="532" r="10"/><circle cx="886" cy="565" r="8"/><circle cx="116" cy="562" r="10"/><circle cx="149" cy="594" r="8"/><circle cx="840" cy="164" r="7"/><circle cx="206" cy="103" r="7"/></g>
-          <g fill="#75857a" font-family="DM Sans, sans-serif" font-size="13" font-weight="600" letter-spacing="1.2">
-            <text x="375" y="395">CENTRAL WALK</text><text x="527" y="289">NORTH WALK</text>
-            <text x="91" y="68">WEST QUAD</text><text x="786" y="70">EAST GARDEN</text>
-            <text x="828" y="620">ASSEMBLY FIELD</text>
-          </g>
-          <g fill="#d4e6d0"><rect x="90" y="520" width="19" height="14" rx="2"/><rect x="126" y="535" width="19" height="14" rx="2"/><rect x="857" y="496" width="19" height="14" rx="2"/><rect x="896" y="511" width="19" height="14" rx="2"/></g>
-          <g fill="#ece5d4"><rect x="250" y="250" width="130" height="97" rx="9"/><rect x="431" y="249" width="118" height="96" rx="9"/><rect x="613" y="249" width="139" height="97" rx="9"/><rect x="251" y="476" width="132" height="98" rx="9"/><rect x="615" y="476" width="138" height="98" rx="9"/><rect x="276" y="583" width="80" height="43" rx="7"/></g>
-          <g fill="#dcc9a5"><rect x="260" y="260" width="110" height="77" rx="6"/><rect x="441" y="259" width="98" height="76" rx="6"/><rect x="623" y="259" width="119" height="77" rx="6"/><rect x="261" y="486" width="112" height="78" rx="6"/><rect x="625" y="486" width="118" height="78" rx="6"/><rect x="284" y="590" width="64" height="29" rx="4" fill="#eadab9"/></g>
-          <g fill="#f5edda"><path d="M270 283h90M270 300h90M451 282h78M451 299h78M633 282h98M633 300h98M271 508h92M271 526h92M635 507h98M635 525h98" stroke="#f5edda" stroke-width="5"/></g>
-          <g fill="#f0dddb"><rect x="427" y="105" width="126" height="59" rx="8"/><rect x="257" y="106" width="118" height="58" rx="8"/></g>
-          <g aria-label="Clickable campus buildings">
-            <rect class="building-hit" data-location="office" x="250" y="250" width="130" height="97" rx="9" role="button" tabindex="0" aria-label="Main Office: show details"/>
-            <rect class="building-hit" data-location="library" x="431" y="249" width="118" height="96" rx="9" role="button" tabindex="0" aria-label="Library: show details"/>
-            <rect class="building-hit" data-location="science" x="613" y="249" width="139" height="97" rx="9" role="button" tabindex="0" aria-label="Science Building: show details"/>
-            <rect class="building-hit" data-location="class-a" x="251" y="476" width="132" height="98" rx="9" role="button" tabindex="0" aria-label="Classroom Block A: show details"/>
-            <rect class="building-hit" data-location="gym" x="615" y="476" width="138" height="98" rx="9" role="button" tabindex="0" aria-label="Gymnasium: show details"/>
-            <rect class="building-hit" data-location="clinic" x="276" y="583" width="80" height="43" rx="7" role="button" tabindex="0" aria-label="School Clinic: show details"/>
-          </g>
-        </svg>
-        <svg class="map-route" id="map-route" viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true"><polyline class="route-shadow" id="route-shadow" points=""></polyline><polyline class="route-line" id="route-line" points=""></polyline></svg>
-        <div id="map-locations"></div>
+      <div class="map-area" id="campus-map" aria-label="LNCHS campus map">
+        <div class="map-stage" id="map-stage">
+          <svg class="map-art" viewBox="0 0 1227 768" preserveAspectRatio="xMidYMid meet" role="img" aria-label="LNCHS campus map">
+            <image href="assets/lnchs-map.png" x="0" y="0" width="1227" height="768" preserveAspectRatio="xMidYMid meet"/>
+          </svg>
+          <svg class="map-route" id="map-route" viewBox="0 0 1227 768" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><polyline class="route-shadow" id="route-shadow" points=""></polyline><polyline class="route-line" id="route-line" points=""></polyline></svg>
+          <div id="map-locations"></div>
+        </div>
         <section class="map-place-card" id="map-place-card" aria-live="polite" hidden></section>
         <div class="you-are-here" id="you-are-here"><span class="you-dot"></span>You are here</div>
         <div class="map-top">
-          <div class="map-title"><strong>Northfield Main Campus</strong><span>Click a building for details</span></div>
-          <div class="map-actions">
-            <button class="map-action" id="locate-button" type="button" aria-label="Use my location">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" stroke="currentColor" stroke-width="1.8"/></svg>My location
-            </button>
-            <button class="map-action safety-action" id="assembly-button" type="button" aria-label="Show route to assembly point">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 22 20H2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Assembly point
-            </button>
-          </div>
+          <div class="map-title"><strong>LNCHS Main Campus</strong><span>Click a location to see its route</span></div>
         </div>
         <div class="map-legend" aria-label="Map legend">
           <span class="legend-item"><i class="legend-dot"></i>Buildings</span>
           <span class="legend-item"><i class="legend-dot service"></i>Services</span>
           <span class="legend-item"><i class="legend-dot safety"></i>Safety</span>
         </div>
-        <div class="map-note">Illustrative layout · Verify routes with campus staff</div>
+        <div class="map-note">Route coordinates are editable · Verify routes with campus staff</div>
         <div class="zoom-tools" aria-label="Map zoom controls">
           <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
           <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
         </div>
       </div>
     </section>
-    <footer><span>Daan · Sample campus map for demonstration</span><span>Ask your school for its current accessibility and emergency routes.</span></footer>
+    <footer><span>Daan · LNCHS campus map</span><span>Confirm campus locations and walking routes with school staff.</span></footer>
   </main>
   <script>
+    const MAP_WIDTH = 1227;
+    const MAP_HEIGHT = 768;
+
     const locations = [
-      { id: "main-gate", name: "Main Gate", kind: "safety", group: "Safety", x: 8, y: 61, node: "mainGate", icon: "gate", short: "Main gate", description: "Primary campus entrance in this sample layout.", details: "Visitor check-in point" },
-      { id: "office", name: "Main Office", kind: "service", group: "Services", x: 31.6, y: 34, node: "office", icon: "office", short: "Main Office", description: "Front office for general questions, school administration, and visitor assistance.", details: "Administration · Visitor help" },
-      { id: "library", name: "Library", kind: "building", group: "Buildings", x: 49, y: 17, node: "library", icon: "building", short: "Library", description: "A study and reading space for students. Ask staff about opening hours and available resources.", details: "Study space · Books and learning resources" },
-      { id: "science", name: "Science Building", kind: "building", group: "Buildings", x: 69.5, y: 34, node: "science", icon: "building", short: "Science", description: "Sample location for science classrooms and practical learning spaces.", details: "Science classes · Labs (sample)" },
-      { id: "class-a", name: "Classroom Block A", kind: "building", group: "Buildings", x: 31.6, y: 76, node: "classA", icon: "building", short: "Block A", description: "Sample classroom building. Check your timetable or ask a teacher for your room number.", details: "Classrooms · Room numbers not specified" },
-      { id: "gym", name: "Gymnasium", kind: "building", group: "Buildings", x: 68.5, y: 76, node: "gym", icon: "building", short: "Gymnasium", description: "Indoor sports and physical education space in this sample campus layout.", details: "Sports · Physical education (sample)" },
-      { id: "clinic", name: "School Clinic", kind: "service", group: "Services", x: 31.6, y: 89, node: "clinic", icon: "clinic", short: "Clinic", description: "For health support, contact the school clinic or ask a staff member to assist you.", details: "Health support · Confirm staffed hours at school" },
-      { id: "east-gate", name: "East Gate", kind: "safety", group: "Safety", x: 91, y: 61, node: "eastGate", icon: "gate", short: "East gate", description: "Additional gate shown on the sample map. Confirm access and opening times with school staff.", details: "Gate access may be restricted" },
-      { id: "north-exit", name: "North Emergency Exit", kind: "safety", group: "Safety", x: 49, y: 12, node: "northExit", icon: "exit", short: "North exit", description: "Emergency exit marker for demonstration only. Follow staff directions and the official evacuation plan.", details: "Not a verified emergency exit" },
-      { id: "south-exit", name: "South Emergency Exit", kind: "safety", group: "Safety", x: 49, y: 92, node: "southExit", icon: "exit", short: "South exit", description: "Emergency exit marker for demonstration only. Follow staff directions and the official evacuation plan.", details: "Not a verified emergency exit" },
-      { id: "assembly", name: "Evacuation Assembly Point", kind: "safety", group: "Safety", x: 86, y: 86, node: "assembly", icon: "assembly", short: "Assembly point", description: "Sample assembly location. Use only the assembly area named in your school's official emergency instructions.", details: "Not a verified evacuation area" },
-      { id: "quad", name: "West Quad", kind: "building", group: "Buildings", x: 15, y: 20, node: "quad", icon: "building", short: "West Quad", description: "Outdoor campus gathering and open space shown in this sample map.", details: "Outdoor space · Facilities not specified" }
+      { id: "gate-1", name: "Gate 1", kind: "safety", group: "Gates", x: 60, y: 385, node: "gate1", icon: "gate", short: "Gate 1", description: "Campus entry point shown on the map.", details: "Confirm access with school staff" },
+      { id: "gate-2", name: "Gate 2", kind: "safety", group: "Gates", x: 60, y: 180, node: "gate2", icon: "gate", short: "Gate 2", description: "Campus entry point shown on the map.", details: "Confirm access with school staff" },
+      { id: "gate-3", name: "Gate 3", kind: "safety", group: "Gates", x: 300, y: 746, node: "gate3", icon: "gate", short: "Gate 3", description: "Campus entry point shown on the map.", details: "Confirm access with school staff" },
+      { id: "gate-4", name: "Gate 4", kind: "safety", group: "Gates", x: 949, y: 679, node: "gate4", icon: "gate", short: "Gate 4", description: "Campus entry point shown on the map.", details: "Confirm access with school staff" },
+      { id: "quezon-hill", name: "Quezon Hill", kind: "building", group: "Landmark", x: 300, y: 145, node: "quezonHill", icon: "building", short: "Quezon Hill", description: "Campus landmark identified on the map.", details: "Landmark" },
+      { id: "dolor-amphitheater", name: "Dolor Amphitheater", kind: "building", group: "Landmark", x: 383, y: 270, node: "dolorAmphitheater", icon: "building", short: "Dolor Amphitheater", description: "Campus amphitheater identified on the map.", details: "Amphitheater" },
+      { id: "filipino-dept", name: "Filipino Dept", kind: "building", group: "Department", x: 282, y: 420, node: "filipinoDept", icon: "office", short: "Filipino Dept", description: "Filipino Department.", details: "Department" },
+      { id: "english-values-guidance", name: "English Dept / Values Department / Guidance", kind: "service", group: "Left wing offices", x: 278, y: 547, node: "englishValuesGuidance", icon: "office", short: "English / Values / Guidance", room: true, mapMarker: false, description: "English Department, Values Department, Guidance, and adjacent left-wing offices.", details: "Adjacent offices in the left wing" },
+      { id: "english-dept", name: "English Dept", kind: "service", group: "Left wing offices", x: 278, y: 519, node: "englishDept", icon: "office", short: "English Dept", room: true, description: "English Department office.", details: "Left wing office" },
+      { id: "values-department", name: "Values Department", kind: "service", group: "Left wing offices", x: 278, y: 535, node: "valuesDept", icon: "office", short: "Values Dept", room: true, description: "Values Department office in the left wing.", details: "Left wing office" },
+      { id: "guidance-office", name: "Guidance Office", kind: "service", group: "Left wing offices", x: 278, y: 548, node: "guidanceOffice", icon: "office", short: "Guidance", room: true, description: "Guidance Office in the left wing.", details: "Left wing office" },
+      { id: "math-dept", name: "Math Dept", kind: "service", group: "Left wing offices", x: 278, y: 564, node: "mathDept", icon: "office", short: "Math Dept", room: true, description: "Math Department office.", details: "Left wing office" },
+      { id: "ap-dept", name: "AP Dept", kind: "service", group: "Left wing offices", x: 278, y: 690, node: "apDept", icon: "office", short: "AP Dept", room: true, description: "AP Department office.", details: "Left wing office" },
+      { id: "admin-bldg", name: "Admin Bldg", kind: "service", group: "Administration", x: 381, y: 599, node: "adminBldg", icon: "office", short: "Admin Bldg", description: "Administration building.", details: "Administration" },
+      { id: "tle-dept", name: "TLE Dept", kind: "building", group: "Department", x: 373, y: 697, node: "tleDept", icon: "office", short: "TLE Dept", description: "TLE Department.", details: "Department" },
+      { id: "vera-hall", name: "Vera Hall", kind: "building", group: "Building", x: 510, y: 683, node: "veraHall", icon: "building", short: "Vera Hall", description: "Vera Hall.", details: "Campus building" },
+      { id: "tennis-court", name: "Tennis Court", kind: "building", group: "Sports", x: 621, y: 648, node: "tennisCourt", icon: "building", short: "Tennis Court", description: "Tennis Court.", details: "Sports facility" },
+      { id: "computer-lab", name: "Computer Lab", kind: "building", group: "Department", x: 647, y: 451, node: "computerLab", icon: "office", short: "Computer Lab", description: "Computer Lab.", details: "Learning facility" },
+      { id: "track-oval", name: "LNCHS Track and Field Oval", kind: "building", group: "Sports", x: 915, y: 361, node: "trackOval", icon: "building", short: "Track and Field Oval", description: "LNCHS Track and Field Oval.", details: "Sports facility" },
+      { id: "g7-sunflower", name: "G7 Sunflower", kind: "building", group: "Grade 7 classrooms", x: 454, y: 190, node: "upperSunflower", icon: "office", short: "Sunflower", room: true, description: "G7 Sunflower classroom.", details: "Grade 7 classroom" },
+      { id: "g7-buttercup", name: "G7 Buttercup", kind: "building", group: "Grade 7 classrooms", x: 510, y: 186, node: "upperButtercup", icon: "office", short: "Buttercup", room: true, description: "G7 Buttercup classroom.", details: "Grade 7 classroom" },
+      { id: "g7-marigold", name: "G7 Marigold", kind: "building", group: "Grade 7 classrooms", x: 555, y: 181, node: "upperMarigold", icon: "office", short: "Marigold", room: true, description: "G7 Marigold classroom.", details: "Grade 7 classroom" },
+      { id: "g7-sampaguita-north", name: "G7 Sampaguita (North)", kind: "building", group: "Grade 7 classrooms", x: 582, y: 179, node: "upperSampaguita", icon: "office", short: "Sampaguita", room: true, description: "G7 Sampaguita classroom in the north block.", details: "Grade 7 classroom" },
+      { id: "g7-tulips", name: "G7 Tulips", kind: "building", group: "Grade 7 classrooms", x: 603, y: 177, node: "upperTulips", icon: "office", short: "Tulips", room: true, description: "G7 Tulips classroom.", details: "Grade 7 classroom" },
+      { id: "g7-daffodil", name: "G7 Daffodil", kind: "building", group: "Grade 7 classrooms", x: 628, y: 176, node: "upperDaffodil", icon: "office", short: "Daffodil", room: true, description: "G7 Daffodil classroom.", details: "Grade 7 classroom" },
+      { id: "g7-gladiola", name: "G7 Gladiola", kind: "building", group: "Grade 7 classrooms", x: 477, y: 279, node: "g7Gladiola", icon: "office", short: "Gladiola", room: true, description: "G7 Gladiola classroom.", details: "Grade 7 classroom" },
+      { id: "g7-hibiscus", name: "G7 Hibiscus", kind: "building", group: "Grade 7 classrooms", x: 495, y: 279, node: "g7Hibiscus", icon: "office", short: "Hibiscus", room: true, description: "G7 Hibiscus classroom.", details: "Grade 7 classroom" },
+      { id: "g7-lotus", name: "G7 Lotus", kind: "building", group: "Grade 7 classrooms", x: 485, y: 310, node: "g7Lotus", icon: "office", short: "Lotus", room: true, description: "G7 Lotus classroom.", details: "Grade 7 classroom" },
+      { id: "g7-hyacinth", name: "G7 Hyacinth", kind: "building", group: "Grade 7 classrooms", x: 485, y: 335, node: "g7Hyacinth", icon: "office", short: "Hyacinth", room: true, description: "G7 Hyacinth classroom.", details: "Grade 7 classroom" },
+      { id: "g7-sampaguita-central", name: "G7 Sampaguita (Central)", kind: "building", group: "Grade 7 classrooms", x: 485, y: 358, node: "g7Sampaguita", icon: "office", short: "Sampaguita", room: true, description: "G7 Sampaguita classroom in the central block.", details: "Grade 7 classroom" },
+      { id: "g7-gumamela", name: "G7 Gumamela", kind: "building", group: "Grade 7 classrooms", x: 500, y: 358, node: "g7Gumamela", icon: "office", short: "Gumamela", room: true, description: "G7 Gumamela classroom.", details: "Grade 7 classroom" },
+      { id: "g7-rosal", name: "G7 Rosal / Rosas", kind: "building", group: "Grade 7 classrooms", x: 477, y: 386, node: "g7Rosal", icon: "office", short: "Rosal / Rosas", room: true, description: "G7 Rosal classroom in the central block.", details: "Grade 7 classroom" },
+      { id: "g7-magnolia", name: "G7 Magnolia", kind: "building", group: "Grade 7 classrooms", x: 498, y: 386, node: "g7Magnolia", icon: "office", short: "Magnolia", room: true, description: "G7 Magnolia classroom.", details: "Grade 7 classroom" },
+      { id: "g7-buttercups", name: "G7 Buttercups", kind: "building", group: "Grade 7 classrooms", x: 594, y: 277, node: "g7Buttercups", icon: "office", short: "Buttercups", room: true, description: "G7 Buttercups classroom.", details: "Grade 7 classroom" },
+      { id: "g7-yellow-bell", name: "G7 Yellow Bell", kind: "building", group: "Grade 7 classrooms", x: 614, y: 277, node: "g7YellowBell", icon: "office", short: "Yellow Bell", room: true, description: "G7 Yellow Bell classroom.", details: "Grade 7 classroom" },
+      { id: "g7-lavender", name: "G7 Lavender", kind: "building", group: "Grade 7 classrooms", x: 594, y: 446, node: "g7Lavender", icon: "office", short: "Lavender", room: true, description: "G7 Lavender classroom.", details: "Grade 7 classroom" },
+      { id: "g7-orchids", name: "G7 Orchids", kind: "building", group: "Grade 7 classrooms", x: 614, y: 446, node: "g7Orchids", icon: "office", short: "Orchids", room: true, description: "G7 Orchids classroom.", details: "Grade 7 classroom" }
     ];
 
+    // Edit these coordinates in the 1227 x 768 map viewBox to keep routes on the green lines.
     const nodes = {
-      mainGate: { x: 80, y: 414 }, westJunction: { x: 232, y: 421 }, center: { x: 490, y: 420 },
-      eastJunction: { x: 790, y: 420 }, eastGate: { x: 916, y: 420 },
-      northJunction: { x: 490, y: 226 }, northCross: { x: 490, y: 153 },
-      southJunction: { x: 490, y: 546 }, southCross: { x: 490, y: 607 },
-      officeJunction: { x: 316, y: 310 }, scienceJunction: { x: 682, y: 310 },
-      clinicJunction: { x: 316, y: 546 }, gymJunction: { x: 682, y: 546 },
-      library: { x: 490, y: 125 }, office: { x: 316, y: 226 }, science: { x: 682, y: 226 },
-      classA: { x: 316, y: 500 }, gym: { x: 682, y: 500 }, clinic: { x: 316, y: 607 },
-      northExit: { x: 490, y: 83 }, southExit: { x: 490, y: 636 },
-      assemblyJunction: { x: 790, y: 546 }, assembly: { x: 850, y: 585 },
-      quadJunction: { x: 80, y: 414 }, quad: { x: 150, y: 210 }
+      gate1: { x: 50, y: 385 }, gate2: { x: 30, y: 180 }, gate3: { x: 300, y: 730 }, gate4: { x: 940, y: 664 },
+      leftJunction: { x: 303, y: 385 }, dolorJunction: { x: 380, y: 385 },
+      g7Rosal: { x: 449, y: 385 }, g7Magnolia: { x: 450, y: 385 },
+      mainJunction: { x: 451, y: 385 }, mainCurve1: { x: 452, y: 381 },
+      mainCurve2: { x: 457, y: 375 }, northPath: { x: 458, y: 370 },
+      g7Sampaguita: { x: 458, y: 358 }, g7Gumamela: { x: 457, y: 358 },
+      g7Hyacinth: { x: 458, y: 335 }, g7Lotus: { x: 458, y: 310 },
+      g7Gladiola: { x: 458, y: 280 }, g7Hibiscus: { x: 459, y: 280 },
+      northBase: { x: 458, y: 230 }, upperCurve1: { x: 460, y: 228 },
+      upperCurve2: { x: 463, y: 225 }, upperCurve3: { x: 466, y: 223 },
+      upperStart: { x: 469, y: 220 }, upperSunflower: { x: 480, y: 220 },
+      upperButtercup: { x: 510, y: 220 }, upperMarigold: { x: 540, y: 220 },
+      upperSampaguita: { x: 560, y: 220 }, buttercupsUpper: { x: 576, y: 220 },
+      upperTulips: { x: 590, y: 220 }, upperDaffodil: { x: 615, y: 220 },
+      upperEast: { x: 619, y: 220 }, buttercupsBranch: { x: 576, y: 285 },
+      g7Buttercups: { x: 590, y: 285 }, g7YellowBell: { x: 610, y: 285 },
+      g7Lavender: { x: 600, y: 424 }, g7Orchids: { x: 614, y: 424 },
+      filipinoDept: { x: 303, y: 420 }, englishDept: { x: 303, y: 475 },
+      guidanceOffice: { x: 303, y: 490 }, valuesDept: { x: 303, y: 500 },
+      mathDept: { x: 303, y: 510 }, leftVertical: { x: 303, y: 530 },
+      englishValuesGuidance: { x: 302, y: 530 }, leftSouth: { x: 302, y: 654 },
+      apDept: { x: 302, y: 690 },
+      adminJunction: { x: 378, y: 530 }, adminBldg: { x: 378, y: 573 },
+      dolorAmphitheater: { x: 380, y: 355 },
+      computerJunction: { x: 451, y: 416 }, computerEast: { x: 592, y: 416 },
+      computerTurn: { x: 592, y: 424 }, computerLab: { x: 618, y: 424 },
+      gate3Walk: { x: 300, y: 654 },
+      southJunction: { x: 451, y: 654 }, tleJunction: { x: 406, y: 654 },
+      tleDept: { x: 406, y: 714 }, veraJunction: { x: 508, y: 654 },
+      veraHall: { x: 508, y: 666 }, tennisJunction: { x: 570, y: 654 },
+      tennisCourt: { x: 588, y: 654 }, tennisUp: { x: 570, y: 612 },
+      tennisCurve: { x: 580, y: 603 }, eastPath: { x: 930, y: 603 },
+      gate4Curve: { x: 940, y: 613 }, quezonHill: { x: 300, y: 145 },
+      trackOval: { x: 915, y: 361 }
     };
 
     const paths = [
-      ["mainGate", "westJunction", "Main Gate Walk", 2], ["westJunction", "center", "Central Walk", 3],
-      ["center", "eastJunction", "Central Walk", 3], ["eastJunction", "eastGate", "East Gate Walk", 2],
-      ["center", "northJunction", "North Walk", 2], ["northJunction", "northCross", "North Walk", 1],
-      ["northCross", "northExit", "North Exit Path", 1], ["northCross", "library", "Library Path", 1],
-      ["northJunction", "officeJunction", "West Quad Walk", 2], ["officeJunction", "office", "Office Path", 1],
-      ["northJunction", "scienceJunction", "Science Walk", 2], ["scienceJunction", "science", "Science Path", 1],
-      ["center", "southJunction", "South Walk", 2], ["southJunction", "southCross", "South Walk", 1],
-      ["southCross", "southExit", "South Exit Path", 1], ["southJunction", "clinicJunction", "Clinic Walk", 1],
-      ["clinicJunction", "clinic", "Clinic Path", 1], ["clinicJunction", "classA", "Classroom Block A Path", 1],
-      ["southJunction", "gymJunction", "Gym Walk", 1], ["gymJunction", "gym", "Gym Path", 1],
-      ["southJunction", "assemblyJunction", "East Garden Walk", 2],
-      ["assemblyJunction", "assembly", "Assembly Field Path", 2], ["westJunction", "quadJunction", "West Quad Walk", 2],
-      ["quadJunction", "quad", "Quad Path", 2], ["center", "officeJunction", "West Walk", 2],
-      ["center", "scienceJunction", "East Walk", 2]
+      ["gate1", "leftJunction", "Gate 1 green walkway", 1],
+      ["leftJunction", "dolorJunction", "Main green walkway", 1],
+      ["dolorJunction", "g7Rosal", "Main green walkway", 0],
+      ["g7Rosal", "g7Magnolia", "Main green walkway", 0],
+      ["g7Magnolia", "mainJunction", "Main green walkway", 1],
+      ["dolorJunction", "dolorAmphitheater", "Amphitheater green walkway", 1],
+      ["leftJunction", "filipinoDept", "Filipino Department green walkway", 1],
+      ["leftJunction", "englishDept", "Left-wing green walkway", 1],
+      ["englishDept", "guidanceOffice", "Left-wing green walkway", 0],
+      ["guidanceOffice", "valuesDept", "Left-wing green walkway", 0],
+      ["valuesDept", "mathDept", "Left-wing green walkway", 0],
+      ["mathDept", "leftVertical", "Left-wing green walkway", 0],
+      ["leftVertical", "englishValuesGuidance", "Left-wing green walkway", 1],
+      ["englishValuesGuidance", "leftSouth", "Left-wing green walkway", 1],
+      ["leftSouth", "apDept", "Left-wing green walkway", 1],
+      ["englishValuesGuidance", "adminJunction", "Administration green walkway", 1],
+      ["adminJunction", "adminBldg", "Administration green walkway", 1],
+      ["leftSouth", "southJunction", "South green walkway", 2],
+      ["mainJunction", "mainCurve1", "Central green walkway", 1],
+      ["mainCurve1", "mainCurve2", "Central green walkway", 1],
+      ["mainCurve2", "northPath", "North green walkway", 1],
+      ["northPath", "g7Sampaguita", "Central classroom green walkway", 1],
+      ["g7Sampaguita", "g7Gumamela", "Central classroom green walkway", 0],
+      ["g7Sampaguita", "g7Hyacinth", "Central classroom green walkway", 0],
+      ["g7Hyacinth", "g7Lotus", "Central classroom green walkway", 0],
+      ["g7Lotus", "g7Gladiola", "Central classroom green walkway", 0],
+      ["g7Gladiola", "g7Hibiscus", "Central classroom green walkway", 0],
+      ["g7Hibiscus", "northBase", "North green walkway", 1],
+      ["northBase", "upperCurve1", "North green walkway", 0],
+      ["upperCurve1", "upperCurve2", "North green walkway", 0],
+      ["upperCurve2", "upperCurve3", "North green walkway", 0],
+      ["upperCurve3", "upperStart", "North green walkway", 0],
+      ["upperStart", "upperSunflower", "Upper green walkway", 0],
+      ["upperSunflower", "upperButtercup", "Upper green walkway", 1],
+      ["upperButtercup", "upperMarigold", "Upper green walkway", 0],
+      ["upperMarigold", "upperSampaguita", "Upper green walkway", 0],
+      ["upperSampaguita", "buttercupsUpper", "Upper green walkway", 0],
+      ["buttercupsUpper", "upperTulips", "Upper green walkway", 1],
+      ["upperTulips", "upperDaffodil", "Upper green walkway", 0],
+      ["upperDaffodil", "upperEast", "Upper green walkway", 0],
+      ["buttercupsUpper", "buttercupsBranch", "Classroom green walkway", 1],
+      ["buttercupsBranch", "g7Buttercups", "Classroom green walkway", 0],
+      ["g7Buttercups", "g7YellowBell", "Classroom green walkway", 0],
+      ["mainJunction", "computerJunction", "Central green walkway", 1],
+      ["computerJunction", "southJunction", "South green walkway", 2],
+      ["computerJunction", "computerEast", "Computer Lab green walkway", 1],
+      ["computerEast", "computerTurn", "Computer Lab green walkway", 1],
+      ["computerTurn", "g7Lavender", "Classroom green walkway", 0],
+      ["g7Lavender", "g7Orchids", "Classroom green walkway", 0],
+      ["g7Orchids", "computerLab", "Computer Lab green walkway", 1],
+      ["gate3", "gate3Walk", "Gate 3 green walkway", 1],
+      ["gate3Walk", "southJunction", "South green walkway", 2],
+      ["southJunction", "tleJunction", "South green walkway", 1],
+      ["tleJunction", "tleDept", "TLE green walkway", 1],
+      ["southJunction", "veraJunction", "East green walkway", 1],
+      ["veraJunction", "veraHall", "Vera Hall green walkway", 1],
+      ["southJunction", "tennisJunction", "Tennis Court green walkway", 1],
+      ["tennisJunction", "tennisCourt", "Tennis Court green walkway", 1],
+      ["tennisJunction", "tennisUp", "Tennis Court green walkway", 1],
+      ["tennisUp", "tennisCurve", "Tennis Court green walkway", 1],
+      ["tennisCurve", "eastPath", "East green walkway", 2],
+      ["eastPath", "gate4Curve", "Gate 4 green walkway", 1],
+      ["gate4Curve", "gate4", "Gate 4 green walkway", 1]
     ];
 
     const placeList = document.getElementById("place-list");
     const placeDetail = document.getElementById("place-detail");
     const markerLayer = document.getElementById("map-locations");
+    const mapStage = document.getElementById("map-stage");
     const search = document.getElementById("place-search");
     const startSelect = document.getElementById("start-select");
     const destinationSelect = document.getElementById("destination-select");
     const routeOutput = document.getElementById("route-output");
     const mapPlaceCard = document.getElementById("map-place-card");
+    const dolorPhoto = document.getElementById("dolor-photo");
+    const filipinoPhoto = document.getElementById("filipino-photo");
+    const sampaguitaPhoto = document.getElementById("sampaguita-photo");
+    const rosalPhoto = document.getElementById("rosal-photo");
+    const hyacinthPhoto = document.getElementById("hyacinth-photo");
+    const veraHallPhoto = document.getElementById("vera-hall-photo");
+    const tleDeptPhoto = document.getElementById("tle-dept-photo");
+    const valuesDepartmentPhoto = document.getElementById("values-department-photo");
+    const tulipsPhoto = document.getElementById("tulips-photo");
+    const adminBldgPhoto = document.getElementById("admin-bldg-photo");
+    const trackOvalPhoto = document.getElementById("track-oval-photo");
+    const sunflowerPhoto = document.getElementById("sunflower-photo");
+    const buttercupPhoto = document.getElementById("buttercup-photo");
+    const hibiscusPhoto = document.getElementById("hibiscus-photo");
+    const magnoliaPhoto = document.getElementById("magnolia-photo");
     const homePage = document.getElementById("home-page");
     const mapPage = document.getElementById("map-page");
     const nameDialog = document.getElementById("name-dialog");
@@ -584,6 +732,21 @@
       const shown = filteredLocations();
       document.getElementById("place-count").textContent = `${shown.length} ${shown.length === 1 ? "location" : "locations"}`;
       const selected = locations.find(place => place.id === selectedPlace);
+      dolorPhoto.hidden = selectedPlace !== "dolor-amphitheater";
+      filipinoPhoto.hidden = selectedPlace !== "filipino-dept";
+      sampaguitaPhoto.hidden = selectedPlace !== "g7-sampaguita-north" && selectedPlace !== "g7-sampaguita-central";
+      rosalPhoto.hidden = selectedPlace !== "g7-rosal";
+      hyacinthPhoto.hidden = selectedPlace !== "g7-hyacinth";
+      veraHallPhoto.hidden = selectedPlace !== "vera-hall";
+      tleDeptPhoto.hidden = selectedPlace !== "tle-dept";
+      valuesDepartmentPhoto.hidden = selectedPlace !== "values-department";
+      tulipsPhoto.hidden = selectedPlace !== "g7-tulips";
+      adminBldgPhoto.hidden = selectedPlace !== "admin-bldg";
+      trackOvalPhoto.hidden = selectedPlace !== "track-oval";
+      sunflowerPhoto.hidden = selectedPlace !== "g7-sunflower";
+      buttercupPhoto.hidden = selectedPlace !== "g7-buttercup";
+      hibiscusPhoto.hidden = selectedPlace !== "g7-hibiscus";
+      magnoliaPhoto.hidden = selectedPlace !== "g7-magnolia";
       mapPlaceCard.hidden = !selected;
       mapPlaceCard.innerHTML = selected ? `
         <div class="map-place-top">
@@ -593,7 +756,7 @@
         </div>
         <p class="map-place-description">${selected.description}</p>
         <div class="map-place-meta">${selected.details}</div>
-        <span class="map-place-sample">Sample information · Confirm details on campus</span>` : "";
+        <span class="map-place-sample">Map position · Confirm with school staff</span>` : "";
       mapPlaceCard.querySelector(".map-place-close")?.addEventListener("click", () => {
         selectedPlace = null;
         placeDetail.hidden = true;
@@ -608,7 +771,7 @@
         </div>
         <p class="place-detail-description">${selected.description}</p>
         <div class="place-detail-meta">${selected.details}</div>
-        <span class="place-detail-note">Sample information · Confirm details on campus</span>` : "";
+        <span class="place-detail-note">Map position · Confirm with school staff</span>` : "";
       placeDetail.querySelector(".place-detail-close")?.addEventListener("click", () => {
         selectedPlace = null;
         placeDetail.hidden = true;
@@ -621,12 +784,30 @@
           <span class="place-arrow" aria-hidden="true">›</span>
         </button>`).join("") : '<div class="no-results">No campus locations match that search.</div>';
       placeList.querySelectorAll(".place-card").forEach(card => card.addEventListener("click", () => choosePlace(card.dataset.id)));
-      markerLayer.innerHTML = locations.map(place => `
-        <button class="map-location ${place.kind} ${selectedPlace === place.id ? "active" : ""}" type="button" data-id="${place.id}" style="left:${place.x}%;top:${place.y}%" aria-label="${place.name}">
-          <span class="pin-icon ${place.kind}">${iconMarkup(place.icon, 13)}</span>
-          <span class="location-label">${place.short}</span>
+      markerLayer.innerHTML = locations.filter(place => place.mapMarker !== false).map(place => `
+        <button class="map-location ${place.kind} ${place.room ? "room-marker" : ""} ${selectedPlace === place.id ? "active" : ""}" type="button" data-id="${place.id}" style="left:${place.x / MAP_WIDTH * 100}%;top:${place.y / MAP_HEIGHT * 100}%" aria-label="${place.name}" title="${place.name}">
+          <span class="pin-icon ${place.kind}">${iconMarkup(place.icon, place.room ? 9 : 13)}</span>
+          ${place.room ? "" : `<span class="location-label">${place.short}</span>`}
         </button>`).join("");
-      markerLayer.querySelectorAll(".map-location").forEach(marker => marker.addEventListener("click", () => choosePlace(marker.dataset.id)));
+      markerLayer.querySelectorAll(".map-location").forEach(marker => marker.addEventListener("click", event => {
+        let target = marker;
+        if (event.detail) {
+          // Resolve overlapping marker hit areas to the nearest map coordinate.
+          let closestDistance = Infinity;
+          let targetDistance = Infinity;
+          markerLayer.querySelectorAll(".map-location").forEach(candidate => {
+            const bounds = candidate.getBoundingClientRect();
+            const distance = Math.hypot(bounds.left + bounds.width / 2 - event.clientX, bounds.top + bounds.height / 2 - event.clientY);
+            if (candidate === marker) targetDistance = distance;
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              target = candidate;
+            }
+          });
+          if (closestDistance + 3 >= targetDistance) target = marker;
+        }
+        choosePlace(target.dataset.id);
+      }));
     }
 
     function choosePlace(id) {
@@ -641,7 +822,11 @@
     function buildRoute() {
       const start = locations.find(place => place.id === startSelect.value);
       const destination = locations.find(place => place.id === destinationSelect.value);
-      if (!start || !destination) return;
+      if (!start || !destination) {
+        routeOutput.hidden = true;
+        clearRoute();
+        return;
+      }
       if (start.node === destination.node) {
         routeOutput.hidden = false;
         routeOutput.innerHTML = `<div class="route-summary"><span>You are already at ${destination.name}.</span></div>`;
@@ -668,7 +853,7 @@
       if (!previous.has(destination.node)) {
         clearRoute();
         routeOutput.hidden = false;
-        routeOutput.innerHTML = '<div class="route-summary">No mapped walking path found. Please ask campus staff for directions.</div>';
+        routeOutput.innerHTML = '<div class="route-summary">No continuous green walkway is marked to this location on the map. Please ask campus staff for directions.</div>';
         return;
       }
       const route = [];
@@ -680,15 +865,25 @@
       }
       const totalMinutes = route.reduce((sum, step) => sum + step.minutes, 0);
       const isSafety = destination.kind === "safety";
-      const instructions = route.map(step =>
-        `<li>Follow ${step.name}${step.to === destination.node ? ` to ${destination.name}` : ""}.</li>`
+      const instructionSteps = route.reduce((steps, step) => {
+        const last = steps[steps.length - 1];
+        if (last && last.name === step.name) {
+          last.isDestination = step.to === destination.node;
+        } else {
+          steps.push({ name: step.name, isDestination: step.to === destination.node });
+        }
+        return steps;
+      }, []);
+      const instructions = instructionSteps.map(step =>
+        `<li>Follow ${step.name}${step.isDestination ? ` to ${destination.name}` : ""}.</li>`
       ).join("");
       routeOutput.hidden = false;
       routeOutput.innerHTML = `
         <div class="route-summary"><span>${start.name} <span aria-hidden="true">→</span> ${destination.name}</span><span class="route-time">~${totalMinutes} min</span></div>
         <ol class="route-steps">${instructions}</ol>
         ${isSafety ? '<div style="margin-top:8px;color:#9e3d35;font-size:9px;font-weight:700">Sample route only. Follow official staff instructions in an emergency.</div>' : ""}`;
-      const points = [nodes[start.node], ...route.map(step => nodes[step.to])].map(point => `${point.x},${point.y}`).join(" ");
+      const points = [nodes[start.node], ...route.map(step => nodes[step.to])]
+        .map(point => `${point.x},${point.y}`).join(" ");
       document.getElementById("route-shadow").setAttribute("points", points);
       const line = document.getElementById("route-line");
       line.setAttribute("points", points);
@@ -704,9 +899,9 @@
     function fillSelects() {
       const options = locations.map(place => `<option value="${place.id}">${place.name}</option>`).join("");
       startSelect.innerHTML = options;
-      destinationSelect.innerHTML = options;
-      startSelect.value = "main-gate";
-      destinationSelect.value = "library";
+      destinationSelect.innerHTML = `<option value="">Choose a destination</option>${options}`;
+      startSelect.value = "gate-1";
+      destinationSelect.value = "";
     }
 
     document.querySelectorAll(".filter").forEach(button => button.addEventListener("click", () => {
@@ -722,60 +917,20 @@
     });
     startSelect.addEventListener("change", buildRoute);
     destinationSelect.addEventListener("change", () => {
-      selectedPlace = destinationSelect.value;
+      selectedPlace = destinationSelect.value || null;
       renderPlaces();
       buildRoute();
-    });
-    document.querySelectorAll(".building-hit").forEach(building => {
-      building.addEventListener("click", () => choosePlace(building.dataset.location));
-      building.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          choosePlace(building.dataset.location);
-        }
-      });
-    });
-    document.getElementById("assembly-button").addEventListener("click", () => {
-      destinationSelect.value = "assembly";
-      selectedPlace = "assembly";
-      renderPlaces();
-      buildRoute();
-    });
-    document.getElementById("locate-button").addEventListener("click", () => {
-      if (!navigator.geolocation) {
-        routeOutput.hidden = false;
-        routeOutput.innerHTML = '<div class="route-summary">GPS is not available in this browser. Choose your starting point from the menu.</div>';
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(
-        () => {
-          routeOutput.hidden = false;
-          routeOutput.innerHTML = '<div class="route-summary">GPS is available, but this sample campus map is not georeferenced. Choose your starting point from the menu.</div>';
-        },
-        error => {
-          routeOutput.hidden = false;
-          const message = error.code === error.PERMISSION_DENIED ? "Location permission was denied. Choose a starting point from the menu." : "Could not determine your location. Choose a starting point from the menu.";
-          routeOutput.innerHTML = `<div class="route-summary">${message}</div>`;
-        },
-        { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 }
-      );
     });
     document.getElementById("zoom-in").addEventListener("click", () => {
       zoom = Math.min(zoom + 0.12, 1.5);
-      document.querySelector(".map-art").style.transform = `scale(${zoom})`;
-      markerLayer.style.transform = `scale(${zoom})`;
-      document.getElementById("map-route").style.transform = `scale(${zoom})`;
+      mapStage.style.transform = `translate(-50%, -50%) scale(${zoom})`;
     });
     document.getElementById("zoom-out").addEventListener("click", () => {
       zoom = Math.max(zoom - 0.12, 1);
-      document.querySelector(".map-art").style.transform = `scale(${zoom})`;
-      markerLayer.style.transform = `scale(${zoom})`;
-      document.getElementById("map-route").style.transform = `scale(${zoom})`;
+      mapStage.style.transform = `translate(-50%, -50%) scale(${zoom})`;
     });
     window.addEventListener("hashchange", showPage);
-    document.querySelector(".map-art").style.transition = "transform .2s ease";
-    markerLayer.style.transition = "transform .2s ease";
-    document.getElementById("map-route").style.transition = "transform .2s ease";
+    mapStage.style.transition = "transform .2s ease";
     fillSelects();
     renderPlaces();
     buildRoute();
